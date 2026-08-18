@@ -1,0 +1,21 @@
+{
+  "file": "ccm_cohort62_join.tsv",
+  "role": "CCM adapter가 MODEL_OOF.tsv에 row_id로 join할 신체계측·실험조건 라벨(동결본)",
+  "frozen_at": "2026-08-05T14:57:37+09:00",
+  "produced_by": "experiment/analytic_sample/_internal/code/run_quality62_pt_imputed.py :: build_cohort()",
+  "columns": [
+    "row_id",
+    "no",
+    "env_pair",
+    "feature_window",
+    "sex",
+    "age",
+    "BMI",
+    "weight"
+  ],
+  "n_rows": 1240,
+  "n_subjects": 62,
+  "sha256": "e53c7ce6f6423676e9772f89b29fae44cc179664242a812c30bbd6e27639356b",
+  "why_frozen": "이 표를 만들려면 quality62 러너를 import해야 하는데, 그 러너가 stale한 model/src 경로와 _archive의 _exp_target_metric_matrix, TabPFN/huggingface까지 끌어온다. 내용은 신체계측·실험조건 라벨뿐이라 재계산할 이유가 없어 동결한다.",
+  "banned_audit": "설문응답(TSV/TCV/TA/TP/PT/P*/M*)·ECG·MBTI 없음 — 신체계측·실험조건 라벨만"
+}
