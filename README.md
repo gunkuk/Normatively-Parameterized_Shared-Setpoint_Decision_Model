@@ -1,8 +1,8 @@
 # CCM — Consensus Comfort Model (재현 최소 패키지)
 
 여러 사람이 한 공간을 공유할 때, **개인별 선호 설정온도를 하나의 공유 설정온도로 합의시키는 모델**과
-그 합의의 사회적 가치를 다축으로 채점하는 코드다. 입력 데이터·실행 진입점·산출물 스키마가 모두
-이 저장소 안에 들어 있어, `python run_ccm.py --full` 한 줄로 결과가 재생성된다.
+그 합의의 사회적 가치를 다축으로 채점하는 재현용 최소 패키지다. 입력 데이터·실행 진입점·산출물
+스키마가 모두 이 저장소 안에 들어 있어, `python run_ccm.py --full` 한 줄로 결과를 재생성할 수 있다.
 
 ---
 
@@ -15,7 +15,7 @@
 | **OOF** (out-of-fold) | 학습에 쓰이지 않은 행에 대한 예측. 낙관 편향을 막는 표준 관행 |
 | **DSF** (desired setpoint frequency) | 개인 1명의 **전체 20개 P9_filled 관측의 최빈값** = 그 사람의 desired setpoint 1개. CCM의 개인 입력 |
 | **shared setpoint** | 한 그룹이 실제로 쓰게 되는 단일 설정온도. CCM의 1차 산출 |
-| **효용(utility) `u_i`** | 그 shared setpoint가 개인 *i*에게 주는 만족도. 삼각형 함수 `clip(1 − |desired−setpoint| / W, 0, 1)`, W = 7.0 °C |
+| **효용(utility) `u_i`** | 그 shared setpoint가 개인 *i*에게 주는 만족도. `clip(1 − |desired−setpoint| / W, 1e-3, 1)`, W = 6.0 °C |
 | **분배 규칙(rule)** | 개인 효용 벡터를 어떤 기준으로 합쳐 setpoint를 고를 것인가의 선택지 (평균·중앙값·공리주의·Rawls 등) |
 | **4축** | 한 결정을 채점하는 네 지표 — 효율(efficiency) · 공정(fairness, 1−Gini) · 형평(equity, 하위 10% CVaR) · 에너지(MWh) |
 
@@ -27,7 +27,7 @@
 - **무엇을 하나**: 62명의 개인 desired setpoint를 확정한 뒤, (그룹크기 N=1~10) × (계절 5) = 50개 조건에서
   각각 300개 그룹을 무작위로 구성하고, 9가지 결정점(분배 규칙 × 불평등회피 계수)으로 shared setpoint를
   정한 다음 4축으로 채점한다.
-- **왜 재현되나**: 셀별 seed·동점 seed가 결정적으로 유도되고, 입력 동결본은 sha256으로 검증되며,
+- **왜 재현되나**: 셀별 seed·동점 seed가 결정적으로 유도되고, 입력 provenance와 실행 hash가 기록되며,
   실행마다 `PROVENANCE.json`에 선택된 구현·해시가 기록된다.
 - **범위 밖**: PCM 학습 코드, 원시 생체신호, 논문 figure 생성기 — 이 저장소에 없다(§7).
 
@@ -65,8 +65,8 @@ python run_ccm.py --full
 | `ccm_p9_raw_by_row_id.tsv` | 설문 P9 **원값**. "이 행이 P9 결측이라 PT로 대체됐는가"를 판정하는 용도 | 2,560행 (P9 결측 593) |
 | `energyplus_lut_baltimore_4a_15.0_31.0_step0.1.json` | setpoint(15.0~31.0 °C, 0.1 °C 간격) × 계절 → 연간 에너지(MWh) 조회표. EnergyPlus v26.1로 DOE Reference Small Office(Baltimore 4A)를 사전 시뮬레이션한 결과 | 1,127 키 |
 
-각 파일 옆의 `*.PROVENANCE.json`이 **어디서 나왔는지·언제 동결됐는지·sha256**을 소유한다.
-`ccm_cohort62_join.tsv`는 실행할 때마다 sha256이 대조되며, 불일치하면 조용히 넘어가지 않고 즉시 중단한다.
+각 입력에 대응하는 provenance 파일이 **출처·동결 시점·sha256**을 기록한다.
+`ccm_cohort62_join.tsv`는 실행할 때마다 sha256을 대조하며, 불일치하면 즉시 중단한다.
 
 > **입력 계약**: `MODEL_OOF.tsv`의 mean cell이 62명·1,240행·248세션이 아니거나 결측이 있으면
 > `adapter.load()`가 예외를 던지고 멈춘다. 폴백은 없다.
@@ -94,7 +94,7 @@ data/MODEL_OOF.tsv (1,240행 = 62명 × 4세션 × 5시점)
         ▼
    shared setpoint
         │
-        │  ⑤ 채점  — 개인 효용 u_i(W=7.0) → 4축 + LUT 에너지 조회
+        │  ⑤ 채점  — 개인 효용 u_i(W=6.0, floor=1e-3) → 4축 + LUT 에너지 조회
         ▼
    outputs/results/*.csv · *.tsv.gz · PROVENANCE.json
 ```
@@ -116,6 +116,9 @@ data/MODEL_OOF.tsv (1,240행 = 62명 × 4세션 × 5시점)
 
 효용에 바닥값 1e-3을 두어 Atkinson의 정의역(0 < u)을 지킨다 — 그래서 ε=0·1이 각각 공리주의·Nash와
 정확히 일치한다.
+
+격자 목적함수의 동점은 median 같은 보조 기준을 넣지 않고, 그룹 구성과 동점 집합에서 SHA-256으로
+seed를 유도한 결정적 균등 무작위로 선택한다.
 
 ---
 
@@ -141,7 +144,7 @@ data/MODEL_OOF.tsv (1,240행 = 62명 × 4세션 × 5시점)
 .
 ├── run_ccm.py           ★ 단일 진입점
 ├── requirements.txt
-├── data/                입력 4종 + 각각의 PROVENANCE (§3)
+├── data/                입력 4종 + provenance (§3)
 ├── model/
 │   ├── ccm/             CCM 패키지
 │   │   ├── adapter.py       입력 계약 검증 + cohort join
@@ -187,7 +190,8 @@ data/MODEL_OOF.tsv (1,240행 = 62명 × 4세션 × 5시점)
 
 ## 8. 원본 프로젝트(C-PCM)와의 코드 차이
 
-동일 코드에서 잘라 왔고, 배포용으로 바꾼 것은 경로뿐이다 — 계산 로직은 한 줄도 다르지 않다.
+동일 코드에서 잘라 왔고, 배포용 경로를 사용한다. 현재 canonical 실행값에 맞춰 group-level 지표는
+12자리까지 보존한다.
 
 | 파일 | 변경 |
 |---|---|
@@ -197,6 +201,10 @@ data/MODEL_OOF.tsv (1,240행 = 62명 × 4세션 × 5시점)
 동일성 확인: 이 저장소의 `outputs/results/desired_frequency_per_subject.tsv`(DSF 62행)가 원본
 프로젝트의 같은 산출물과 값이 일치한다.
 
-## 9. 인용·라이선스
+## 9. 라이선스와 귀속
 
-미정. 배포 조건과 인용 문구는 저장소 소유자가 정한 뒤 이 절에 채운다.
+- 코드와 관련 문서: [MIT License](LICENSE), © 2026 `gunkuk`
+- `data/`의 프로젝트 데이터: [CC BY 4.0](LICENSE-DATA), 귀속 `황예원·국건·정다현`
+
+데이터를 수정·재배포할 때는 원 귀속, 라이선스 링크, 변경 여부를 함께 표시한다. EnergyPlus·DOE
+기반 LUT처럼 제3자 출처가 있는 자료는 개별 provenance의 원출처 고지도 함께 유지한다.

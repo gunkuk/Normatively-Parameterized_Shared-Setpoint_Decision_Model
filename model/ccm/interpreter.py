@@ -281,9 +281,11 @@ def _compute_cell(
                     "eps": eps_out,
                     "rep": rep,  # 0..R-1 — 이 셀의 몇 번째 무작위 그룹인가
                     "setpoint": round(float(sp_o), 3),
-                    "efficiency": round(float(u.mean()), 6),
-                    "fairness": round(float(1 - social.gini(u)), 6),
-                    "equity_cvar10": round(float(social.cvar(u)), 6),
+                    # Pareto membership compares group-level metrics directly. Keep enough
+                    # precision that display rounding cannot turn distinct outcomes into ties.
+                    "efficiency": round(float(u.mean()), 12),
+                    "fairness": round(float(1 - social.gini(u)), 12),
+                    "equity_cvar10": round(float(social.cvar(u)), 12),
                     "energy_MWh": round(energy.apply(float(sp_o), season), 3),
                     # 그룹 구성원 — 재현·사후 층별분석용(피험자 번호를 ; 로 이어 붙임)
                     "members": ";".join(str(x) for x in subject_no[g]),

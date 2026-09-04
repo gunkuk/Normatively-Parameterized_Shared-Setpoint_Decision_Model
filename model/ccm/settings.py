@@ -150,10 +150,14 @@ PROVISIONAL = {
     },
     "P3": {
         "항목": "operational setpoint 산정",
-        "legacy": "격자 1회 argmax + 동점 시 median(desired) 쪽 선택",
-        "값": {"method": "grid_argmax", "tie_break": "nearest_median"},
-        "출처": "engine choose_c() + _argmax_center()",
-        "주의": "반복 수렴 아님(정적 최적화). maximin/atkinson-ε∞만 raw-minimax 해석해",
+        "legacy": "격자 1회 argmax + 동점 후보 균등 무작위 선택",
+        "값": {
+            "method": "grid_argmax",
+            "tie_break": "uniform_random",
+            "reproducibility": "sha256(desired_group + tied_grid_indices)",
+        },
+        "출처": "rules._argmax_tie_random() + experiment/tie-break/README.md",
+        "주의": "fairness·median 등 보조축 없음. 동일 입력은 같은 고정 seed를 써 재현 가능",
     },
     "P4": {
         "항목": "형평 수식",
@@ -167,21 +171,18 @@ PROVISIONAL = {
         "legacy": "clip(1 − |desired − setpoint| / W, 0, 1)",
         "값": {
             "form": "triangular_clip",
-            "W_c": 7.0,
+            "W_c": 6.0,
             "clip_mode": "clip",
             "floor": 1e-3,
         },
-        "출처": "W_c=7.0은 ASHRAE 55/ISO 7730 PMV-PPD + TSV 척도 환산(2026-08-05 사용자 확정)",
+        "출처": "W_c=6.0은 ASHRAE 55/ISO 7730 PMV-PPD + TSV 척도 환산(2026-08-13 사용자 확정)",
         "주의": (
-            "★ 2026-08-05 W_c 3.5 → 7.0 확정. 근거: 열감각투표(TSV) 1 scale unit ≈ 3°C "
+            "★ 2026-08-13 W_c 7.0 → 6.0 확정. 근거: 열감각투표(TSV) 1 scale unit ≈ 3°C "
             "(Wang et al., Building and Environment 138:181-193, 2018, 피인용 634) → "
-            "W=7°C는 2.33 scale unit → PMV=2.33 → PPD=89.3%. 즉 '효용 0'이 '약 90%가 "
-            "심각한 불만족'과 대응하도록 잡았다. 구 3.5는 legacy COMFORT_W_M9를 물려받은 "
-            "무근거 값이었고, 같은 환산으로는 PMV=1.17/PPD=33.6%(아직 2/3 만족)에 불과했다. "
-            "2026-07-28 사용자 지시로 clip on/off 전환 가능(CCM_UTILITY_MODE=clip|linear). "
-            "clip은 |Δ|>W인 사람을 전부 바닥값으로 뭉개 목적함수를 포화시킨다. 실측(W=3.5): "
-            "clip을 끄면 maximin의 frontier 성립률이 24.7%→92.7%로 뒤집혔다 — W=7.0에서는 "
-            "포화 자체가 크게 줄어 이 민감도도 재측정이 필요하다."
+            "W=6°C는 2.00 scale unit → PPD=76.8%에 대응한다. 구 3.5와 7.0은 이전 "
+            "판본이다. clip은 |Δ|≥W인 사람을 utility floor로 처리하며, 이 값은 결과를 좌우하는 "
+            "provisional parameter다. "
+            "하한은 utility.triangular_clip에서 1e-3으로 통일한다."
         ),
     },
     "P8": {
