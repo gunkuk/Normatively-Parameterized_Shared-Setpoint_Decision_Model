@@ -1,210 +1,118 @@
-# CCM — Consensus Comfort Model (재현 최소 패키지)
+# NPSDM — Normatively Parameterized Shared-Setpoint Decision Model
 
-여러 사람이 한 공간을 공유할 때, **개인별 선호 설정온도를 하나의 공유 설정온도로 합의시키는 모델**과
-그 합의의 사회적 가치를 다축으로 채점하는 재현용 최소 패키지다. 입력 데이터·실행 진입점·산출물
-스키마가 모두 이 저장소 안에 들어 있어, `python run_ccm.py --full` 한 줄로 결과를 재생성할 수 있다.
+NPSDM is a small, reproducible implementation of a shared indoor-temperature decision framework. It compares conventional rules with an Atkinson-based family of rules that makes the priority between average group utility and protection of lower-utility occupants explicit.
 
----
+## 1. Quick start
 
-## 0. 용어 (30초, 이 문서 전체 공통)
-
-| 용어 | 뜻 |
-|---|---|
-| **PCM** (Personal Comfort Model) | 개인별 선호 설정온도를 예측하는 상류 모델. **이 저장소 범위 밖**이며, 그 결과물(OOF 예측표)만 입력으로 받는다 |
-| **P9_filled** | 개인이 보고한 "혼자 재실 시 원하는 설정온도"(°C). 설문 문항 P9가 숫자면 그대로, 결측이면 같은 시점의 PT로 채운 값 |
-| **OOF** (out-of-fold) | 학습에 쓰이지 않은 행에 대한 예측. 낙관 편향을 막는 표준 관행 |
-| **DSF** (desired setpoint frequency) | 개인 1명의 **전체 20개 P9_filled 관측의 최빈값** = 그 사람의 desired setpoint 1개. CCM의 개인 입력 |
-| **shared setpoint** | 한 그룹이 실제로 쓰게 되는 단일 설정온도. CCM의 1차 산출 |
-| **효용(utility) `u_i`** | 그 shared setpoint가 개인 *i*에게 주는 만족도. `clip(1 − |desired−setpoint| / W, 1e-3, 1)`, W = 6.0 °C |
-| **분배 규칙(rule)** | 개인 효용 벡터를 어떤 기준으로 합쳐 setpoint를 고를 것인가의 선택지 (평균·중앙값·공리주의·Rawls 등) |
-| **4축** | 한 결정을 채점하는 네 지표 — 효율(efficiency) · 공정(fairness, 1−Gini) · 형평(equity, 하위 10% CVaR) · 에너지(MWh) |
-
----
-
-## 1. BLUF
-
-- **무엇이 들어 있나**: ① DSF 입력 행렬(`data/MODEL_OOF.tsv`) ② DSF 코드 ③ CCM 코드 ④ 실행 진입점.
-- **무엇을 하나**: 62명의 개인 desired setpoint를 확정한 뒤, (그룹크기 N=1~10) × (계절 5) = 50개 조건에서
-  각각 300개 그룹을 무작위로 구성하고, 9가지 결정점(분배 규칙 × 불평등회피 계수)으로 shared setpoint를
-  정한 다음 4축으로 채점한다.
-- **왜 재현되나**: 셀별 seed·동점 seed가 결정적으로 유도되고, 입력 provenance와 실행 hash가 기록되며,
-  실행마다 `PROVENANCE.json`에 선택된 구현·해시가 기록된다.
-- **범위 밖**: PCM 학습 코드, 원시 생체신호, 논문 figure 생성기 — 이 저장소에 없다(§7).
-
----
-
-## 2. 빠른 시작
+The only required software is Python 3.10 or newer.
 
 ```bash
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
+python run_npsdm.py --smoke
+python run_npsdm.py --full
 ```
 
-```bash
-python run_ccm.py --smoke
-```
+`--smoke` runs group sizes 3 and 10 with three repetitions per size. It checks the input and execution path quickly. `--full` runs the complete analysis: group sizes 3 through 10, 300 groups per size, and 2,400 synthetic groups in total.
 
-```bash
-python run_ccm.py --full
-```
+All generated files are written under `outputs/`, which is intentionally excluded from version control. The generated `outputs/RESULTS_SCHEMA.md` describes every result column.
 
-- `--smoke`: 그룹크기 2·6 × annual 2셀만 (약 20초). **입력·환경 점검용.**
-- `--full`: 50셀 전체. 결과는 `outputs/` 아래에 쓰인다.
-- smoke가 만든 checkpoint를 full이 그대로 재사용한다 — smoke는 정밀도를 낮춘 판본이 아니라
-  같은 정밀도의 **부분집합**이기 때문이다(반복수 R=300 동일).
-- 의존성은 numpy·pandas·matplotlib 뿐이다. TabPFN·torch·EnergyPlus 실행파일은 필요 없다
-  (에너지는 미리 계산된 LUT 조회로 처리한다 — §3).
+## 2. Canonical study design
 
----
+The implementation follows the final manuscript's methods:
 
-## 3. 입력 데이터 (4종, 전부 `data/`)
+- The original experiment included 128 participants. The final analytic cohort contains 62 adults, 28 women and 34 men.
+- The cohort provides 248 sessions and 1,240 thermal-response observations.
+- Each participant has 20 repeated direct desired-setpoint observations. 117 of the 1,240 observations are missing reports and remain missing; no replacement target is constructed.
+- A representative individual desired setpoint is the most frequent reported value. If several values have the same frequency, the value nearest that participant's overall reported mean is selected. An exact distance tie is resolved by the lower value.
+- For each group size from 3 to 10, 300 groups are sampled uniformly without replacement within a group. Participants may appear in different synthetic groups.
+- Candidate grid-based setpoints range from 12 to 33 degrees Celsius in 0.1-degree increments.
 
-| 파일 | 무엇인가 | 규모 |
-|---|---|---|
-| **`MODEL_OOF.tsv`** | **DSF의 최종 input matrix.** PCM(TabPFN 챔피언)의 OOF 예측표. `cell=="mean"` 행이 채택 행렬이며 열 `actual`=실측 P9_filled, `prediction`=OOF 예측 | 62명 · 1,240행 · 248세션 |
-| `ccm_cohort62_join.tsv` | `row_id`로 join하는 신체계측·실험조건 라벨(sex/age/BMI/weight/env_pair/feature_window). PMV 규칙의 met 계산에 쓰인다 | 1,240행 |
-| `ccm_p9_raw_by_row_id.tsv` | 설문 P9 **원값**. "이 행이 P9 결측이라 PT로 대체됐는가"를 판정하는 용도 | 2,560행 (P9 결측 593) |
-| `energyplus_lut_baltimore_4a_15.0_31.0_step0.1.json` | setpoint(15.0~31.0 °C, 0.1 °C 간격) × 계절 → 연간 에너지(MWh) 조회표. EnergyPlus v26.1로 DOE Reference Small Office(Baltimore 4A)를 사전 시뮬레이션한 결과 | 1,127 키 |
+The data file contains only the final analytic cohort and the variables needed by this release. It does not contain upstream prediction artifacts or building-energy calculations.
 
-각 입력에 대응하는 provenance 파일이 **출처·동결 시점·sha256**을 기록한다.
-`ccm_cohort62_join.tsv`는 실행할 때마다 sha256을 대조하며, 불일치하면 즉시 중단한다.
+## 3. Decision rules
 
-> **입력 계약**: `MODEL_OOF.tsv`의 mean cell이 62명·1,240행·248세션이 아니거나 결측이 있으면
-> `adapter.load()`가 예외를 던지고 멈춘다. 폴백은 없다.
+Each synthetic group receives a shared setpoint from the following rules:
 
----
-
-## 4. 파이프라인 (입력에서 결과까지)
-
-```
-data/MODEL_OOF.tsv (1,240행 = 62명 × 4세션 × 5시점)
-        │
-        │  ① adapter.load()  — 계약 검증 + cohort 라벨 join
-        ▼
-   d_valid (1,240행)
-        │
-        │  ② DSF: desired_at23.build()  — 개인별 20관측의 최빈값
-        ▼
-   62명 × desired setpoint 1개
-        │
-        │  ③ sampling  — 셀마다 N명 그룹을 300회 무작위 구성
-        ▼
-   그룹 (N=1~10) × 계절(annual·spring·summer·fall·winter)
-        │
-        │  ④ rule  — 15.0~31.0 °C 0.1 °C 격자에서 규칙별 shared setpoint 선택
-        ▼
-   shared setpoint
-        │
-        │  ⑤ 채점  — 개인 효용 u_i(W=6.0, floor=1e-3) → 4축 + LUT 에너지 조회
-        ▼
-   outputs/results/*.csv · *.tsv.gz · PROVENANCE.json
-```
-
-**② DSF 동점 해소 규칙** (`model/ccm/desired_at23.py`) — 순서 고정:
-
-1. 전체 20관측의 최빈값. 유일하면 확정 (62명 중 57명).
-2. 공동 최빈값이면 그 개인의 20관측 평균에 가장 가까운 후보 (5명 중 3명 해소).
-3. 평균과의 거리까지 같은 잔여 2명은 확정된 canonical override: 피험자 19 = 24 °C, 83 = 22 °C.
-
-**④ 분배 규칙 5종 × ε 격자 = 결정점 9개**:
-
-| 규칙 | 내용 |
+| Rule | Definition |
 |---|---|
-| `pmv` | 전통 표준 baseline. 그룹 met 구성에 맞춘 평균 PMV=0 온도 (**개인 선호를 쓰지 않는다**) |
-| `mean` / `median` | 개인 desired의 산술평균 / 중앙값 |
-| `threshold_cov` | 만족 밴드 안에 드는 인원수 최대화 (satisficing) |
-| `atkinson` (ε = 0, 0.5, 1, 2, ∞) | 불평등회피 계수 하나로 규범을 잇는 축. **ε=0 = 공리주의**(총효용 최대), **ε=1 = Nash**(기하평균), **ε→∞ = Rawls maximin**(최악 1인 보호) |
+| `pmv` | Select the grid temperature whose group-average Predicted Mean Vote (PMV) is closest to thermal neutrality. Metabolic rate is estimated from sex, age, mass, and height. Clothing is 0.6 clo, air speed is 0.2 m/s, relative humidity is 50%, and mean radiant temperature equals air temperature. |
+| `threshold_coverage` | Select the grid temperature that covers the largest number of occupants within a 3-degree absolute deviation from their representative desired setpoint. |
+| `mean` | Use the arithmetic mean of the group's representative desired setpoints. |
+| `median` | Use the median of the group's representative desired setpoints. |
+| `atkinson` | Select the grid temperature that maximizes Atkinson social welfare for one inequality-aversion value. |
 
-효용에 바닥값 1e-3을 두어 Atkinson의 정의역(0 < u)을 지킨다 — 그래서 ε=0·1이 각각 공리주의·Nash와
-정확히 일치한다.
+The Atkinson rule is evaluated at epsilon values 0, 0.5, 1, 2, and infinity. Epsilon 0 is the arithmetic-mean case, epsilon 1 is the geometric-mean case, and infinity is the maximin limit. Grid ties use a stable hash-derived uniform choice so the result is deterministic without adding a second preference rule.
 
-격자 목적함수의 동점은 median 같은 보조 기준을 넣지 않고, 그룹 구성과 동점 집합에서 SHA-256으로
-seed를 유도한 결정적 균등 무작위로 선택한다.
+## 4. Welfare evaluation
 
----
+For a selected shared setpoint, each occupant receives a common triangular utility:
 
-## 5. 산출물 (`outputs/`, git 추적 안 함)
-
-| 경로 | 내용 |
-|---|---|
-| `outputs/results/{tag}.csv` · `{tag}_summary.tsv` | 셀 × 규칙 단위 요약 (setpoint, 4축, 표준편차) |
-| `outputs/results/{tag}_groups.tsv.gz` | 그룹 단위 전수 결과 |
-| `outputs/results/desired_frequency_per_subject.tsv` | **DSF 결과** — 피험자별 desired setpoint |
-| `outputs/results/desired_frequency_pool.tsv` · `_resolution.tsv` | DSF 확정 근거 — 전수 20관측(대체 플래그 포함), 개인별 확정 경로 |
-| `outputs/results/PROVENANCE.json` | 선택된 구현·잠정값 ID·코드 지문·계약 실측치 |
-| `outputs/RESULTS_SCHEMA.md` | 위 파일들의 열 정의 (실행할 때마다 자동 갱신) |
-| `outputs/checkpoints/` | 셀 단위 중간 결과. 재실행 시 재사용 |
-
-`{tag}`는 `smoke_p9filled` 또는 `full_p9filled`이다.
-
----
-
-## 6. 폴더 지도
-
+```text
+utility = clip(1 - absolute(desired_setpoint - shared_setpoint) / 6, 0.001, 1)
 ```
+
+The same mapping is applied to every occupant. The resulting group is evaluated on three higher-is-better dimensions:
+
+- `efficiency`: mean individual utility.
+- `equity_cvar10`: mean utility in the lowest 10% of the group utility distribution. This is the primary lower-tail protection measure.
+- `fairness`: one minus the Gini coefficient of individual utility. This is reported as a supplementary distributional measure.
+
+Efficiency and equity are the primary comparison dimensions. Fairness is supplementary. The model does not produce an energy outcome.
+
+## 5. Input file
+
+`data/desired_setpoint_observations.csv` has one row per participant:
+
+| Column | Meaning |
+|---|---|
+| `subject` | Stable participant identifier. |
+| `sex` | `0` for female and `1` for male. |
+| `age` | Age in years. |
+| `weight_kg` | Body mass in kilograms. |
+| `height_m` | Height in metres, retained for the PMV calculation. |
+| `desired_setpoints_c` | Twenty direct reports separated by semicolons; `NA` preserves a missing report. |
+
+The loader expands the compact column into 1,240 observation rows and checks the 62-person, 20-observations-per-person, and 117-missing-report contract before running the model.
+
+## 6. Generated outputs
+
+For a full run, `outputs/results/` contains:
+
+| File | Contents |
+|---|---|
+| `full_groups.tsv.gz` | 21,600 group-rule rows: 2,400 groups evaluated under nine decision points. |
+| `full_summary.tsv` | 72 group-size by decision-point summaries. |
+| `desired_setpoint_observations.tsv` | Expanded direct observations used by the loader. |
+| `desired_setpoints.tsv` | One representative desired setpoint per participant. |
+| `dsf_resolution.tsv` | Frequency, tie candidates, and selected value for each participant. |
+| `full_PROVENANCE.json` | Input checksum, configuration, row counts, and code checksums. |
+| `../RESULTS_SCHEMA.md` | Generated column definitions and run size. |
+
+The smoke run uses the same rules and settings on a smaller, deterministic subset. Running it twice produces the same tables.
+
+## 7. Repository layout
+
+```text
 .
-├── run_ccm.py           ★ 단일 진입점
-├── requirements.txt
-├── data/                입력 4종 + provenance (§3)
-├── model/
-│   ├── ccm/             CCM 패키지
-│   │   ├── adapter.py       입력 계약 검증 + cohort join
-│   │   ├── desired_at23.py  ★ DSF (개인별 최빈값 확정)
-│   │   ├── rules.py         분배 규칙 (pmv·mean·median·threshold_cov·atkinson)
-│   │   ├── utility.py       개인 효용 u_i
-│   │   ├── social.py        사회후생 집계 (Gini·CVaR·Atkinson)
-│   │   ├── sampling.py      그룹 표본 구성
-│   │   ├── interpreter.py   셀 sweep 실행 + 산출물 기록
-│   │   ├── montecarlo.py    잔차 블록 치환 기반 불확실성 분석 (선택 실행)
-│   │   ├── registry.py      교체축 등록/해석 (rule·utility·sampling …)
-│   │   ├── settings.py      ★ 모든 설정값의 단일 진실 공급원
-│   │   └── …                binning · reduce · representative · sources · visual_registry
-│   └── EnergyPlus/
-│       └── energy.py     LUT 정확 조회 (보간·외삽 없음)
-└── outputs/             실행 산출물 (§5)
+├── run_npsdm.py                 # single execution entry point
+├── data/
+│   └── desired_setpoint_observations.csv
+├── model/npsdm/
+│   ├── adapter.py                # input expansion and contract checks
+│   ├── desired_setpoint.py       # representative setpoint function
+│   ├── rules.py                  # PMV and shared-setpoint rules
+│   ├── utility.py                # individual utility
+│   ├── social.py                 # Gini, lower-tail utility, Atkinson welfare
+│   ├── sampling.py               # deterministic synthetic groups
+│   ├── interpreter.py             # simulation and output writing
+│   └── settings.py               # single configuration source
+└── outputs/                      # generated files, not committed
 ```
 
-설정을 바꾸려면 **`model/ccm/settings.py` 한 곳만** 고친다. 그 파일은 아무것도 import하지 않고
-값만 갖는다(순환 의존 차단). 아직 확정되지 않은 값은 임의 기본값으로 굳히지 않고 `PROVISIONAL`
-대장에 ID(P1~P8)와 근거·주의사항을 달아 등록해 두었다 — 결과 해석 시 그 목록을 먼저 보면 된다.
+The package is deliberately small. To change a canonical analysis value, edit `model/npsdm/settings.py`, rerun the full command, and inspect the new provenance record.
 
-환경변수로 바꿀 수 있는 축(기본값이 정본):
+## 8. License and attribution
 
-| 변수 | 기본값 | 다른 값 |
-|---|---|---|
-| `CCM_PERSON_GRAIN` | `subject_frequency` (행=피험자 62) | `session` (행=피험자×세션×시점 1,240) |
-| `CCM_SAMPLING_MODE` | `subject` | `pooled` · `mixed`(성별/연령 층화) |
-| `CCM_DECISION_SOURCE` | `oracle` (실측 P9_filled로 결정) | `prediction` (PCM 예측치로 결정) |
+Code and documentation are provided under the [MIT License](LICENSE), copyright 2026 `gunkuk`.
 
-`oracle`과 `prediction`의 차이가 곧 **PCM 예측오차가 합의 결과로 전파된 양**이다 — 채점은 두 모드
-모두 항상 실측값으로 하고 결정입력만 바뀐다. 다만 `prediction` 경로는 개인 1값으로 접는 집계 방식이
-미확정(잠정)이므로 그대로 해석하지 말 것.
-
----
-
-## 7. 범위 밖 (여기 없는 것)
-
-- **PCM 학습 코드와 원시 데이터** — 생체신호 원본(수십 GB)과 TabPFN 학습 파이프라인. 이 저장소는
-  그 결과인 `MODEL_OOF.tsv`만 받는다.
-- **논문 figure 생성기** — 별도 모듈이며 여기 포함하지 않았다. 수치 정본은 `outputs/results/`에 있다.
-- **`data.xlsx` 원본 설문** — 필요한 P9 한 열만 동결본으로 떼어 왔다.
-
-## 8. 원본 프로젝트(C-PCM)와의 코드 차이
-
-동일 코드에서 잘라 왔고, 배포용 경로를 사용한다. 현재 canonical 실행값에 맞춰 group-level 지표는
-12자리까지 보존한다.
-
-| 파일 | 변경 |
-|---|---|
-| `model/ccm/settings.py` | `PCM_OOF_RELPATH`·LUT 경로를 `data/`로, 산출물 root를 `outputs/`로 (원본은 `experiment/…` 트리) |
-| `adapter.py` · `interpreter.py` · `energy.py` | 저장소 루트 탐지 표식을 `CLAUDE.md` → `run_ccm.py`로 |
-
-동일성 확인: 이 저장소의 `outputs/results/desired_frequency_per_subject.tsv`(DSF 62행)가 원본
-프로젝트의 같은 산출물과 값이 일치한다.
-
-## 9. 라이선스와 귀속
-
-- 코드와 관련 문서: [MIT License](LICENSE), © 2026 `gunkuk`
-- `data/`의 프로젝트 데이터: [CC BY 4.0](LICENSE-DATA), 귀속 `황예원·국건·정다현`
-
-데이터를 수정·재배포할 때는 원 귀속, 라이선스 링크, 변경 여부를 함께 표시한다. EnergyPlus·DOE
-기반 LUT처럼 제3자 출처가 있는 자료는 개별 provenance의 원출처 고지도 함께 유지한다.
+The included study data are provided, to the extent of the licensors' rights, under [CC BY 4.0](LICENSE-DATA). Retain the attribution and license link when sharing or adapting the data, and state whether changes were made.

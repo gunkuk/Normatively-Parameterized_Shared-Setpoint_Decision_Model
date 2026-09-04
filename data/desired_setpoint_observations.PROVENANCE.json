@@ -1,0 +1,30 @@
+{
+  "file": "data/desired_setpoint_observations.csv",
+  "sha256": "947ba0aa7171dcd6d90ca319c0a09fe000f31848c619a6051941d354b06f2161",
+  "source": "Final analytic cohort extracted from the final manuscript-aligned canonical survey table.",
+  "source_variables": [
+    "subject_id",
+    "sex",
+    "age",
+    "weight",
+    "BMI",
+    "desired_temp_solo"
+  ],
+  "transformation": [
+    "Retain the 62 final analytic subjects and their 20 observations in source order.",
+    "Store direct desired-setpoint reports without target replacement.",
+    "Encode missing direct reports as NA.",
+    "Derive height_m as sqrt(weight_kg / BMI) for the PMV calculation."
+  ],
+  "contract": {
+    "subjects": 62,
+    "observations": 1240,
+    "observations_per_subject": 20,
+    "missing_desired_setpoints": 117,
+    "sex_encoding": {
+      "0": "female",
+      "1": "male"
+    }
+  },
+  "license": "CC BY 4.0; see LICENSE-DATA"
+}
