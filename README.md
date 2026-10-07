@@ -1,6 +1,47 @@
-# NPSDM — Normatively Parameterized Shared-Setpoint Decision Model
+# NPSDM Reproducible Shared Setpoint Decisions
 
-NPSDM is a small, reproducible implementation of a shared indoor-temperature decision framework. It compares conventional rules with an Atkinson-based family of rules that makes the priority between average group utility and protection of lower-utility occupants explicit.
+This repository provides two explicitly separated analyses. The **as-submitted mode** recomputes the historical decisions and welfare behind the submitted results. The **direct-report mode** preserves the previous public implementation using direct reports with missing values left as NA. The modes use different inputs, DSF rules, sampling, and tie policies; do not mix their results.
+
+## Reproduce the submitted numerical results
+
+```bash
+python -m pip install -r requirements.txt
+python run_npsdm.py --verify-input
+python run_npsdm.py --smoke-submission
+python run_npsdm.py --reproduce-submission
+python -m unittest discover -s tests -v
+```
+
+The full historical mode regenerates 2,400 synthetic group compositions using the original hash-derived cell seeds, derives 62 representative setpoints from 1,240 historical observations, and recomputes all 21,600 group-rule decisions. Reference temperatures are used only to validate the new decisions, never to select them. It then recalculates mean utility, minimum utility, and 1−Gini. Results are written to `outputs/submission_full/`: `groups.tsv`, `overall.tsv`, and `verification.json`.
+
+`data/submission/` contains three files: person-level observations (filled and original direct reports), historical membership/temperature validation fixtures, and the reference checksum/summary contract. The included participant identifiers are the same pseudonymous IDs used by the existing study release; no participant names or physiological raw signals are included.
+
+Verified historical endpoints:
+
+| ε | Efficiency | Equity | Equality |
+|---|---:|---:|---:|
+| 0 | 0.815750 | 0.523167 | 0.888614 |
+| ∞ | 0.779564 | 0.645729 | 0.920967 |
+
+All 21,600 decisions were independently joined to the preexisting saved results; maximum welfare difference was below 5.1×10⁻⁷ (stored-result rounding). The numerical verification record is in `validation/SUBMISSION_REPRODUCTION.json`. Tests check input corruption, historical membership/DSF regeneration, and rejection of a changed reference temperature, demonstrating that fixtures are validation rather than decision inputs.
+
+### Historical choices and known differences
+
+The purpose of the historical mode is faithful numerical reproduction, not correction or empirical validation of these choices:
+
+- It uses 117 PT-filled missing reports and DSF final-tie overrides (participant 19→24°C and 83→22°C). The direct-report mode keeps the missing reports as NA.
+- Historical grid: 15–31°C at 0.1°C. Submitted Methods describe 12–33°C. The historical grid indices matter to deterministic tie selection.
+- Historical threshold coverage: ±3°C. Submitted Methods describe ±2°C.
+- The historical numeric-sex PMV branch treats code 0 as male for metabolic estimation, unlike the direct-report mode's stated 0=female coding. This behavior is retained and disclosed solely to reproduce the saved results.
+- Historical DSF SD: population 1.6821°C, sample 1.6958°C; submitted text states 1.66°C.
+
+These inconsistencies require scientific review before interpreting the historical implementation as a corrected operational model. Changing them should be a separate, labeled analysis rather than silently replacing the reference results.
+
+This repository verifies numerical decisions and welfare. It does not reproduce the manually edited figure artwork, Word layout, real-world occupant acceptance, or energy/control performance.
+
+## Existing direct-report mode
+
+The following sections document the preserved direct-report implementation. Its `--smoke` and `--full` outputs go to separate files and do not replace `submission_full`.
 
 ## 1. Quick start
 
@@ -18,7 +59,7 @@ All generated files are written under `outputs/`, which is intentionally exclude
 
 ## 2. Canonical study design
 
-The implementation follows the final manuscript's methods:
+The direct-report mode has its own explicit contract; it is not numerically identical to the frozen as-submitted analysis:
 
 - The original experiment included 128 participants. The final analytic cohort contains 62 adults, 28 women and 34 men.
 - The cohort provides 248 sessions and 1,240 thermal-response observations.

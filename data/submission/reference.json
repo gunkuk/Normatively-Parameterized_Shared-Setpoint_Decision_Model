@@ -1,0 +1,63 @@
+{
+  "source": "Frozen historical inputs behind the submitted numerical results",
+  "input_sha256": {
+    "observations.csv": "c848f4fc734e20d70e4b68bc9956e42f148d2ee3d0bb6320a2ff023c22703362",
+    "groups.csv": "1b8dcdf2378248b8ee22f0378861254b81c0582309b0c2061f1d7e753d9aeff8"
+  },
+  "welfare": {
+    "atkinson_0.0": {
+      "efficiency": 0.8157501933333333,
+      "equity": 0.5231670908333333,
+      "equality": 0.8886139391666665
+    },
+    "atkinson_0.5": {
+      "efficiency": 0.8148805645833332,
+      "equity": 0.5443484879166668,
+      "equality": 0.8955363766666666
+    },
+    "atkinson_1.0": {
+      "efficiency": 0.8119772833333333,
+      "equity": 0.5564028029166667,
+      "equality": 0.8995733054166669
+    },
+    "atkinson_2.0": {
+      "efficiency": 0.8040721195833334,
+      "equity": 0.5814166816666667,
+      "equality": 0.90681738
+    },
+    "atkinson_inf": {
+      "efficiency": 0.77956403625,
+      "equity": 0.6457291679166667,
+      "equality": 0.9209672770833334
+    },
+    "mean": {
+      "efficiency": 0.8018921999999999,
+      "equity": 0.5798565187499999,
+      "equality": 0.9123762958333334
+    },
+    "median": {
+      "efficiency": 0.8157153404166667,
+      "equity": 0.5291193095833334,
+      "equality": 0.8935538408333332
+    },
+    "pmv": {
+      "efficiency": 0.7113166791666666,
+      "equity": 0.3748362420833333,
+      "equality": 0.8496964591666667
+    },
+    "threshold_cov": {
+      "efficiency": 0.7512446395833333,
+      "equity": 0.5303559825,
+      "equality": 0.8982558383333332
+    }
+  },
+  "known_differences": [
+    "Historical DSF includes 117 PT-filled observations and the final tie overrides; the direct-report mode leaves NA missing.",
+    "Historical decision grid is 15\u201331\u00b0C; submitted Methods describe 12\u201333\u00b0C.",
+    "Historical threshold coverage uses \u00b13\u00b0C; submitted Methods describe \u00b12\u00b0C.",
+    "Historical numeric sex branch treats code 0 as male in PMV metabolism; this is retained solely for historical reproduction.",
+    "DSF population SD is 1.6821\u00b0C and sample SD 1.6958\u00b0C; the submitted text states 1.66\u00b0C."
+  ],
+  "original_result_sha256": "f844957aef1cb333df65f9c6fe73087e07d4354830afd045911bde461eeb92d8",
+  "serialization": "UTF-8 with LF line endings; checksums remain valid in a fresh Git checkout"
+}
