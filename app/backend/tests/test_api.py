@@ -128,7 +128,7 @@ def test_operational_modes_and_actions(client, mode):
     a = client.get(
         "/api/v1/analytics/summary", params=dict(zone_id=z, mode=mode)
     ).json()
-    assert a["decision_count"] == 1 and a["buckets"][0]["person_seconds"] == 2700
+    assert a["decision_count"] == 1 and sum(b["person_seconds"] for b in a["buckets"]) == pytest.approx(2700)
     opposite = "REPLAY" if mode == "DEMO" else "DEMO"
     assert (
         client.get(

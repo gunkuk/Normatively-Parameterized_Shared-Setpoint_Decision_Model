@@ -36,5 +36,5 @@ jobs:
           done
           exit 1
       - run: npm run test:e2e --prefix app/frontend
-      - if: always()
+      - if: always() && hashFiles('app/.env') != ''
         run: docker compose -f app/docker-compose.yml --env-file app/.env down

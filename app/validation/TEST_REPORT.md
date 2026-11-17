@@ -58,3 +58,5 @@ The 23°C anchor and multi-objective tie rule are explicit operational design ch
 Existing research files and the user's uncommitted changes are not part of this PR. New files live under app/ except the app-only GitHub Actions workflow. There is no automatic merge.
 
 No organizational SSO, distributed multi-worker job scheduler, full subject-erasure workflow, autonomous HVAC control, empirically calibrated thermal dynamics, or site deployment approval is claimed. Local roles use provisioned bearer credentials, jobs use one process, retention is an explicit dry-run-first administrative CLI, and actual operation requires authorized site data. These boundaries are documented rather than hidden as completed production capabilities.
+
+CI regression: a run near Asia/Seoul midnight correctly split one 15-minute exposure across two daily buckets. The test now checks total person-seconds across buckets instead of assuming one calendar day. Failed early setup also skips container teardown when no environment file exists.
