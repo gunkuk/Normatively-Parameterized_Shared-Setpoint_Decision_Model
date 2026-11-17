@@ -1,0 +1,37 @@
+{
+  "status": "PASS",
+  "mode": "full",
+  "subjects": 62,
+  "observations": 1240,
+  "historically_filled": 117,
+  "groups": 2400,
+  "decision_rows": 21600,
+  "sampling": "regenerated from historical cell seeds; membership fixtures matched",
+  "decision_recalculation": "all nine decisions independently recomputed from person inputs",
+  "maximum_temperature_serialization_error_c": 0.0004444444444438034,
+  "scope": "numerical results; manual figure appearance and DOCX layout are outside this mode",
+  "known_differences": [
+    "Historical DSF includes 117 PT-filled observations and the final tie overrides; the direct-report mode leaves NA missing.",
+    "Historical decision grid is 15\u201331\u00b0C; submitted Methods describe 12\u201333\u00b0C.",
+    "Historical threshold coverage uses \u00b13\u00b0C; submitted Methods describe \u00b12\u00b0C.",
+    "Historical numeric sex branch treats code 0 as male in PMV metabolism; this is retained solely for historical reproduction.",
+    "DSF population SD is 1.6821\u00b0C and sample SD 1.6958\u00b0C; the submitted text states 1.66\u00b0C."
+  ],
+  "input_sha256": {
+    "observations.csv": "c848f4fc734e20d70e4b68bc9956e42f148d2ee3d0bb6320a2ff023c22703362",
+    "groups.csv": "1b8dcdf2378248b8ee22f0378861254b81c0582309b0c2061f1d7e753d9aeff8"
+  },
+  "code_sha256": {
+    "__init__.py": "1f6232f939431d4c2beb784760a72fce1b4925058dcb4d141ee38d3ed0d42786",
+    "adapter.py": "7e3c975aa18b95bf475b97479db2c6e1d95de35dbdad03cf750452be859294b4",
+    "desired_setpoint.py": "cd349cca85f1f579c037cb7cac51bd72c81db1f8fd03898f348358ee57347f26",
+    "interpreter.py": "4e4b02c0a0d2e5f708fc6aa9f3a31c078374e17a174585ec03e15fad80ebd4b6",
+    "local_studies.py": "bed9a54eab87f1f4e20a100ff96882024055ad6eded59e4a328b56560542afa2",
+    "rules.py": "1ee4e3cddaae0df95694032c2b812c0cd1aa819604e994463b7d5920850a5db2",
+    "sampling.py": "63d269215a924550406568efbd4c9434a18e313a2026d6f3a63597903a4193ef",
+    "settings.py": "6556719a132ae820975e21db11c0611fe9f8c8953bee072e33c70f7a235df1f8",
+    "social.py": "f780534ca217fc919f8431867a3ba487da61d874cea915ec185378967fb021fd",
+    "submission.py": "d916cefc3c08d5e3bdd543c8076e2fb238806ae449aaff8f8603214d6acb8e0f",
+    "utility.py": "0f79a08d17be5fc32d72560ddd3ce093c6006ea200325f0b5461aa639bd37a51"
+  }
+}

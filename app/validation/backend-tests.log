@@ -1,0 +1,26 @@
+.......................................                                  [100%]
+============================== warnings summary ===============================
+app\.venv\Lib\site-packages\starlette\testclient.py:37
+  C:\Users\rjs11\Desktop\DB\2_PAPER\04_규범 매개 공유온도 설정 (BAE)\(git) release\app\.venv\Lib\site-packages\starlette\testclient.py:37: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = typing.Callable[[], typing.ContextManager[anyio.abc.BlockingPortal]]
+
+app\backend\npsdm_app\api.py:84
+  C:\Users\rjs11\Desktop\DB\2_PAPER\04_규범 매개 공유온도 설정 (BAE)\(git) release\app\backend\npsdm_app\api.py:84: DeprecationWarning:
+          on_event is deprecated, use lifespan event handlers instead.
+
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+
+    @app.on_event("startup")
+
+app\.venv\Lib\site-packages\fastapi\applications.py:4495
+  C:\Users\rjs11\Desktop\DB\2_PAPER\04_규범 매개 공유온도 설정 (BAE)\(git) release\app\.venv\Lib\site-packages\fastapi\applications.py:4495: DeprecationWarning:
+          on_event is deprecated, use lifespan event handlers instead.
+
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+
+    return self.router.on_event(event_type)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+39 passed, 3 warnings in 4.37s

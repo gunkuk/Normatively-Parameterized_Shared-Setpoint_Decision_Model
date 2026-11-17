@@ -1,0 +1,9 @@
+# API and authorization
+
+Base path /api/v1. Runtime typed request schemas and validation errors: /docs and /openapi.json. All business routes require Authorization: Bearer <token>; health/ready is public. Tokens are environment-provisioned SHA-256 digests, mapped to id, tenant and role. Roles: Viewer read; Researcher inference/ingestion/policy drafting; Operator inference, ingestion, approvals and decisions; Admin all of these plus zone creation. Mutations enforce roles server-side and all lookups include tenant scope.
+
+Routes: GET settings, GET question-bank/provenance, GET question-bank/score (auditable arbitrary pair score), GET me; POST elicitation/sessions; GET/POST elicitation/{id}/next-or-response; POST stop/resume; GET results; POST fixed-regret (optional zone_id and weights); GET/POST sites/zones; POST ingest/{preferences,occupancy,environment,feedback,metering} (JSON list) and /csv (text/plain CSV); GET policies, POST policies/draft, POST policies/{id}/approve; POST operations/decide, POST operations/{id}/actions, GET operations/history; GET analytics/summary, GET analytics/grid-weights; POST demo/seed; GET exports/{session_id}.
+
+Errors: 401 invalid authentication, 403 role prohibited, 404 absent/cross-tenant resource, 409 stale question/configuration or idempotency conflict, 422 invalid scientific/operational input. Duplicate identical responses/actions return existing records. Response append, session state and posterior checkpoint occur in one transaction. Ingestion is transactional per request.
+
+Long jobs return status/progress rather than an approximate answer. The backend deployment is intentionally one worker process. Multi-worker distributed scheduling and organizational SSO are not implemented. Do not scale worker count without replacing the in-process executor and job recovery protocol.

@@ -1,0 +1,13 @@
+
+> npsdm-operator-console@1.0.0 test:e2e
+> playwright test
+
+
+Running 2 tests using 1 worker
+
+(node:33304) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 tests\operator.spec.ts:5:1 › Operator journey: zone, approved policy, demo, action, analytics, export (2.4s)
+  ok 2 tests\operator.spec.ts:15:1 › Invalid credentials remain blocked (250ms)
+
+  2 passed (3.4s)

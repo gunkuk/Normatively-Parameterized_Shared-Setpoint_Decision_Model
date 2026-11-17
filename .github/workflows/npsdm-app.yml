@@ -1,0 +1,40 @@
+name: NPSDM app verification
+on:
+  pull_request:
+    paths: ["app/**", ".github/workflows/npsdm-app.yml"]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: app/frontend/package-lock.json
+      - run: pip install -r app/backend/requirements.txt
+      - run: python -m pytest app/backend/tests tests/test_submission.py -q
+      - run: npm ci --prefix app/frontend
+      - run: npm run typecheck --prefix app/frontend
+      - run: npm run build --prefix app/frontend
+      - run: python app/scripts/setup_env.py
+      - run: docker compose -f app/docker-compose.yml --env-file app/.env up -d --build
+      - run: npx playwright install --with-deps chromium
+        working-directory: app/frontend
+      - name: Wait for API readiness
+        run: |
+          for attempt in $(seq 1 30); do
+            if curl --fail http://localhost:8000/api/v1/health/ready; then exit 0; fi
+            sleep 2
+          done
+          exit 1
+      - run: npm run test:e2e --prefix app/frontend
+      - if: always()
+        run: docker compose -f app/docker-compose.yml --env-file app/.env down

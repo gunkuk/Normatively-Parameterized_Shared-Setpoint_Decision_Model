@@ -1,0 +1,108 @@
+{
+  "health": {
+    "status": "ready",
+    "config_hash": "1178ec2049d922c15aeaad9d3e179ab52facf5c4e14d7fcfb976edfe41f2fccd"
+  },
+  "checks": [
+    {
+      "mode": "REPLAY",
+      "decision_id": "e46fdc30-a78a-4c4b-920a-bf7fbc2219c1",
+      "recommended_c": 23.0
+    },
+    {
+      "mode": "SHADOW",
+      "decision_id": "de1d6c04-0c62-477f-9bd7-5b26d9affcc1",
+      "recommended_c": 23.0
+    },
+    {
+      "mode": "ASSISTED_LIVE",
+      "decision_id": "4b5fd18f-c83f-47f3-b44d-ab91b11f912a",
+      "recommended_c": 23.0
+    }
+  ],
+  "session_id": "7557faff-080c-43f0-8b4e-932faf1255a4",
+  "first_question": {
+    "group_id": "N10/R118",
+    "grid": "N10/H4",
+    "a": 93,
+    "b": 130,
+    "id": "N10/R118:93:130",
+    "source_version": "1178ec2049d922c15aeaad9d3e179ab52facf5c4e14d7fcfb976edfe41f2fccd",
+    "eig_bits": 0.803333903422746,
+    "evaluated_candidates": 53172000,
+    "elapsed_seconds": 96.54063001199995,
+    "exact_discrete_global": true,
+    "desired": [
+      26.0,
+      25.0,
+      25.0,
+      24.0,
+      25.0,
+      19.0,
+      25.0,
+      25.0,
+      25.0,
+      25.0
+    ],
+    "temperatures": [
+      21.3,
+      25.0
+    ],
+    "utilities": [
+      [
+        0.21666666666666679,
+        0.3833333333333334,
+        0.3833333333333334,
+        0.55,
+        0.3833333333333334,
+        0.6166666666666665,
+        0.3833333333333334,
+        0.3833333333333334,
+        0.3833333333333334,
+        0.3833333333333334
+      ],
+      [
+        0.8333333333333334,
+        1.0,
+        1.0,
+        0.8333333333333334,
+        1.0,
+        0.001,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    ],
+    "metrics": {
+      "efficiency": [
+        0.40666666666666673,
+        0.8667666666666667
+      ],
+      "equity": [
+        0.21666666666666679,
+        0.001
+      ],
+      "equality": [
+        0.8827868852459018,
+        0.873195400530708
+      ],
+      "total": [
+        4.066666666666667,
+        8.667666666666667
+      ]
+    },
+    "display_seed": 31,
+    "display_order": [
+      0,
+      1
+    ],
+    "label": "Which shared setpoint do you prefer?",
+    "utility_interpretation": "Model-generated utility, not measured comfort"
+  },
+  "elapsed_seconds": 105.25009200000204,
+  "posterior_status": "ESTIMATED_UNCALIBRATED",
+  "stage": "COMMON",
+  "zone_id": "04d40a2e-4f37-4397-8333-e563cb7a3060",
+  "fixture_notice": "ACTUAL input pathway tested using labeled validation fixtures; these are not real human observations."
+}

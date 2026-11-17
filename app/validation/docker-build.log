@@ -1,0 +1,169 @@
+ Image app-backend Building
+ Image app-frontend Building
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.25kB 0.0s done
+#1 DONE 0.0s
+
+#2 [backend internal] load build definition from Dockerfile
+#2 transferring dockerfile: 706B done
+#2 DONE 0.0s
+
+#3 [frontend internal] load build definition from Dockerfile
+#3 transferring dockerfile: 180B done
+#3 DONE 0.0s
+
+#4 [auth] library/python:pull token for registry-1.docker.io
+#4 DONE 0.0s
+
+#5 [auth] library/node:pull token for registry-1.docker.io
+#5 DONE 0.0s
+
+#6 [frontend internal] load metadata for docker.io/library/node:22-bookworm-slim
+#6 ...
+
+#7 [backend internal] load metadata for docker.io/library/python:3.11-slim
+#7 DONE 1.3s
+
+#6 [frontend internal] load metadata for docker.io/library/node:22-bookworm-slim
+#6 DONE 1.3s
+
+#8 [backend 1/9] FROM docker.io/library/python:3.11-slim@sha256:07d4824036af339fa1b6ef769cc99d9c10a141769538b52b3b597c84f7a7b535
+#8 resolve docker.io/library/python:3.11-slim@sha256:07d4824036af339fa1b6ef769cc99d9c10a141769538b52b3b597c84f7a7b535 0.1s done
+#8 DONE 0.1s
+
+#9 [frontend internal] load .dockerignore
+#9 transferring context: 94B done
+#9 DONE 0.0s
+
+#10 [frontend internal] load build context
+#10 DONE 0.0s
+
+#11 [frontend 1/6] FROM docker.io/library/node:22-bookworm-slim@sha256:e9f565d32859f0cbfb52125eafe8be39390f24dac302dc3cdf566e8ba3ab21ee
+#11 resolve docker.io/library/node:22-bookworm-slim@sha256:e9f565d32859f0cbfb52125eafe8be39390f24dac302dc3cdf566e8ba3ab21ee
+#11 resolve docker.io/library/node:22-bookworm-slim@sha256:e9f565d32859f0cbfb52125eafe8be39390f24dac302dc3cdf566e8ba3ab21ee 0.0s done
+#11 DONE 0.0s
+
+#12 [backend internal] load build context
+#12 transferring context: 263.65kB 0.0s done
+#12 DONE 0.1s
+
+#13 [backend 2/9] WORKDIR /repo
+#13 CACHED
+
+#14 [backend 5/9] COPY model /repo/model
+#14 CACHED
+
+#15 [backend 6/9] COPY data/submission /repo/data/submission
+#15 CACHED
+
+#16 [backend 3/9] COPY app/backend/requirements.txt /tmp/requirements.txt
+#16 CACHED
+
+#17 [backend 4/9] RUN pip install --no-cache-dir -r /tmp/requirements.txt
+#17 CACHED
+
+#18 [backend 7/9] COPY app/SETTINGS.yaml /repo/app/SETTINGS.yaml
+#18 CACHED
+
+#10 [frontend internal] load build context
+#10 transferring context: 135.18kB 0.0s done
+#10 DONE 0.0s
+
+#19 [frontend 3/6] COPY package*.json ./
+#19 CACHED
+
+#20 [frontend 2/6] WORKDIR /app
+#20 CACHED
+
+#21 [frontend 4/6] RUN npm ci
+#21 CACHED
+
+#22 [backend 8/9] COPY app/backend /repo/app/backend
+#22 DONE 0.1s
+
+#23 [frontend 5/6] COPY . .
+#23 DONE 0.1s
+
+#24 [backend 9/9] WORKDIR /repo/app/backend
+#24 DONE 0.1s
+
+#25 [frontend 6/6] RUN npm run build
+#25 ...
+
+#26 [backend] exporting to image
+#26 exporting layers 0.2s done
+#26 exporting manifest sha256:63a3477b756f4e785e0da2333d3e11fd7260c9411bf464db6ac3850b8f8438db 0.0s done
+#26 exporting config sha256:3ad280ef1f7cab40a55277302514e55b115ada5970b552e569866fc2f03dc032 0.0s done
+#26 exporting attestation manifest sha256:6b1c99d4444f54624ba9799ff9dce2abefa7a77e84d3f9019637b867e6f0fa29 0.1s done
+#26 exporting manifest list sha256:886e0fd9dbd03b78640d4385b1360364499222eaf738299a6b07c9c6a3921fb9 0.0s done
+#26 naming to docker.io/library/app-backend:latest done
+#26 unpacking to docker.io/library/app-backend:latest 0.1s done
+#26 DONE 0.5s
+
+#25 [frontend 6/6] RUN npm run build
+#25 0.822
+#25 0.822 > npsdm-operator-console@1.0.0 build
+#25 0.822 > next build
+#25 0.822
+#25 ...
+
+#27 [backend] resolving provenance for metadata file
+#27 DONE 0.0s
+
+#25 [frontend 6/6] RUN npm run build
+#25 1.278 ▲ Next.js 16.4.6 (Turbopack)
+#25 1.356 ✓ Running next.config.ts took 77ms
+#25 1.363 Attention: Next.js now collects completely anonymous telemetry regarding usage.
+#25 1.363 This information is used to shape Next.js' roadmap and prioritize features.
+#25 1.363 You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+#25 1.363 https://nextjs.org/telemetry
+#25 1.363
+#25 1.398
+#25 1.416   Creating an optimized production build ...
+#25 2.884 ✓ Compiled successfully in 1465ms
+#25 2.894   Running TypeScript ...
+#25 4.502   Finished TypeScript in 1609ms ...
+#25 4.505   Collecting page data using 5 workers ...
+#25 4.890   Generating static pages using 5 workers (0/3) ...
+#25 5.174 ✓ Generating static pages using 5 workers (3/3) in 284ms
+#25 5.178   Finalizing page optimization ...
+#25 5.186
+#25 5.188 Route (app)
+#25 5.188 ┌ ○ /
+#25 5.188 ├ ○ /_not-found
+#25 5.188 └ ƒ /api/[...path]
+#25 5.188
+#25 5.188
+#25 5.188 ○  (Static)   prerendered as static content
+#25 5.188 ƒ  (Dynamic)  server-rendered on demand
+#25 5.188
+#25 DONE 5.4s
+
+#28 [frontend] exporting to image
+#28 exporting layers
+#28 exporting layers 0.9s done
+#28 exporting manifest sha256:4efd62e3945064ca1ca464002db385f8489c679714b1f74d6736d9f0b2472647 0.0s done
+#28 exporting config sha256:39a3c16ad5a227d801e12a63cddb308acc5e781871de15196640756b6540fec8 0.0s done
+#28 exporting attestation manifest sha256:5ed9d3df4aff310fe097a3db469901b3ea84881afc76762e737e6d6477ff0a2c 0.0s done
+#28 exporting manifest list sha256:28fd0ed21e4b216f4b678e21e5767ee3ed43b5b4616ea599b8450d0f0fd9bca3
+#28 exporting manifest list sha256:28fd0ed21e4b216f4b678e21e5767ee3ed43b5b4616ea599b8450d0f0fd9bca3 0.0s done
+#28 naming to docker.io/library/app-frontend:latest done
+#28 unpacking to docker.io/library/app-frontend:latest
+#28 unpacking to docker.io/library/app-frontend:latest 0.2s done
+#28 DONE 1.2s
+
+#29 [frontend] resolving provenance for metadata file
+#29 DONE 0.0s
+ Image app-backend Built
+ Image app-frontend Built
+ Container app-db-1 Running
+ Container app-backend-1 Recreate
+ Container app-backend-1 Recreated
+ Container app-frontend-1 Recreate
+ Container app-frontend-1 Recreated
+ Container app-db-1 Waiting
+ Container app-db-1 Healthy
+ Container app-backend-1 Starting
+ Container app-backend-1 Started
+ Container app-frontend-1 Starting
+ Container app-frontend-1 Started

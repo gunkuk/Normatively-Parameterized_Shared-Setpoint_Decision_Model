@@ -1,0 +1,38 @@
+[
+  {
+    "command": [
+      "C:\\Users\\rjs11\\Desktop\\DB\\2_PAPER\\04_\uaddc\ubc94 \ub9e4\uac1c \uacf5\uc720\uc628\ub3c4 \uc124\uc815 (BAE)\\(git) release\\app\\.venv\\Scripts\\python.exe",
+      "-m",
+      "pytest",
+      "app/backend/tests",
+      "-q"
+    ],
+    "status": "PASS",
+    "returncode": 0,
+    "output": ".......................................                                  [100%]\n============================== warnings summary ===============================\napp\\.venv\\Lib\\site-packages\\starlette\\testclient.py:37\n  C:\\Users\\rjs11\\Desktop\\DB\\2_PAPER\\04_\uaddc\ubc94 \ub9e4\uac1c \uacf5\uc720\uc628\ub3c4 \uc124\uc815 (BAE)\\(git) release\\app\\.venv\\Lib\\site-packages\\starlette\\testclient.py:37: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.\n    _PortalFactoryType = typing.Callable[[], typing.ContextManager[anyio.abc.BlockingPortal]]\n\napp\\backend\\npsdm_app\\api.py:84\n  C:\\Users\\rjs11\\Desktop\\DB\\2_PAPER\\04_\uaddc\ubc94 \ub9e4\uac1c \uacf5\uc720\uc628\ub3c4 \uc124\uc815 (BAE)\\(git) release\\app\\backend\\npsdm_app\\api.py:84: DeprecationWarning: \n          on_event is deprecated, use lifespan event handlers instead.\n  \n          Read more about it in the\n          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).\n          \n    @app.on_event(\"startup\")\n\napp\\.venv\\Lib\\site-packages\\fastapi\\applications.py:4495\n  C:\\Users\\rjs11\\Desktop\\DB\\2_PAPER\\04_\uaddc\ubc94 \ub9e4\uac1c \uacf5\uc720\uc628\ub3c4 \uc124\uc815 (BAE)\\(git) release\\app\\.venv\\Lib\\site-packages\\fastapi\\applications.py:4495: DeprecationWarning: \n          on_event is deprecated, use lifespan event handlers instead.\n  \n          Read more about it in the\n          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).\n          \n    return self.router.on_event(event_type)\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n39 passed, 3 warnings in 4.37s\n"
+  },
+  {
+    "command": [
+      "npm.cmd",
+      "run",
+      "typecheck",
+      "--prefix",
+      "app/frontend"
+    ],
+    "status": "PASS",
+    "returncode": 0,
+    "output": "\n> npsdm-operator-console@1.0.0 typecheck\n> tsc --noEmit\n\n"
+  },
+  {
+    "command": [
+      "npm.cmd",
+      "run",
+      "build",
+      "--prefix",
+      "app/frontend"
+    ],
+    "status": "PASS",
+    "returncode": 0,
+    "output": "\n> npsdm-operator-console@1.0.0 build\n> next build\n\n\u25b2 Next.js 16.4.6 (Turbopack)\n\u2713 Running next.config.ts took 39ms\n\n  Creating an optimized production build ...\n\u2713 Compiled successfully in 251ms\n  Running TypeScript ...\n  Finished TypeScript in 1186ms ...\n  Collecting page data using 5 workers ...\n  Generating static pages using 5 workers (0/3) ...\n\u2713 Generating static pages using 5 workers (3/3) in 592ms\n  Finalizing page optimization ...\n\nRoute (app)\n\u250c \u25cb /\n\u251c \u25cb /_not-found\n\u2514 \u0192 /api/[...path]\n\n\n\u25cb  (Static)   prerendered as static content\n\u0192  (Dynamic)  server-rendered on demand\n\n"
+  }
+]

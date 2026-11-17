@@ -1,0 +1,697 @@
+{
+  "scope": "Internal synthetic verification on two frozen groups, reduced temperature bank, 12 seeds x 24 responses. Not external calibration or full-bank acquisition performance.",
+  "records": [
+    {
+      "model": "M0",
+      "method": "EIG",
+      "seed": 1000,
+      "responses": 24,
+      "switched": false,
+      "brier": 0.1756399662510132,
+      "credible_coverage": 1.0
+    },
+    {
+      "model": "M0",
+      "method": "EIG",
+      "seed": 1001,
+      "responses": 24,
+      "switched": false,
+      "brier": 0.1262420598029116,
+      "credible_coverage": 1.0
+    },
+    {
+      "model": "M0",
+      "method": "EIG",
+      "seed": 1002,
+      "responses": 24,
+      "switched": false,
+      "brier": 0.20645225867874184,
+      "credible_coverage": 1.0
+    },
+    {
+      "model": "M0",
+      "method": "EIG",
+      "seed": 1003,
+      "responses": 24,
+      "switched": false,
+      "brier": 0.1341841230947073,
+      "credible_coverage": 1.0
+    },
+    {
+      "model": "M0",
+      "method": "EIG",
+      "seed": 1004,
+      "responses": 24,
+      "switched": false,
+      "brier": 0.24090794019683096,
+      "credible_coverage": 1.0
+    },
+    {
+      "model": "M0",
+      "method": "EIG",
+      "seed": 1005,
+      "responses": 24,
+      "switched": false,
+      "brier": 0.18920071477619885,
+      "credible_coverage": 1.0
+    },
+    {
+      "model": "M0",
+      "method": "EIG",
+      "seed": 1006,
+      "responses": 24,
+      "switched": false,
+      "brier": 0.1360958949449141,
+      "credible_coverage": 1.0
+    },
+    {
+      "model": "M0",
+      "method": "EIG",
+      "seed": 1007,
+      "responses": 24,
+      "switched": false,
+      "brier": 0.14298331345890494,
+      "credible_coverage": 1.0
+    },
+    {
+      "model": "M0",
+      "method": "EIG",
+      "seed": 1008,
+      "responses": 24,
+      "switched": false,
+      "brier": 0.242082069872653,
+      "credible_coverage": 1.0
+    },
+    {
+      "model": "M0",
+      "method": "EIG",
+      "seed": 1009,
+      "responses": 24,
+      "switched": false,
+      "brier": 0.21152447272455896,
+      "credible_coverage": 1.0
+    },
+    {
+      "model": "M0",
+      "method": "EIG",
+      "seed": 1010,
+      "responses": 24,
+      "switched": false,
+      "brier": 0.21171226451854397,
+      "credible_coverage": 1.0
+    },
+    {
+      "model": "M0",
+      "method": "EIG",
+      "seed": 1011,
+      "responses": 24,
+      "switched": false,
+      "brier": 0.1488088343233269,
+      "credible_coverage": 1.0
+    },
+    {
+      "model": "M0",
+      "method": "random",
+      "seed": 1000,
+      "responses": 24,
+      "switched": true,
+      "brier": 0.1519355643363276,
+      "credible_coverage": 1.0
+    },
+    {
+      "model": "M0",
+      "method": "random",
+      "seed": 1001,
+      "responses": 24,
+      "switched": false,
+      "brier": 0.09380177836813731,
+      "credible_coverage": 1.0
+    },
+    {
+      "model": "M0",
+      "method": "random",
+      "seed": 1002,
+      "responses": 24,
+      "switched": false,
+      "brier": 0.08916996432823765,
+      "credible_coverage": 1.0
+    },
+    {
+      "model": "M0",
+      "method": "random",
+      "seed": 1003,
+      "responses": 24,
+      "switched": false,
+      "brier": 0.04163400352885286,
+      "credible_coverage": 1.0
+    },
+    {
+      "model": "M0",
+      "method": "random",
+      "seed": 1004,
+      "responses": 24,
+      "switched": false,
+      "brier": 0.12818416456684112,
+      "credible_coverage": 1.0
+    },
+    {
+      "model": "M0",
+      "method": "random",
+      "seed": 1005,
+      "responses": 24,
+      "switched": false,
+      "brier": 0.06099276499280274,
+      "credible_coverage": 1.0
+    },
+    {
+      "model": "M0",
+      "method": "random",
+      "seed": 1006,
+      "responses": 24,
+      "switched": false,
+      "brier": 0.03888822900459631,
+      "credible_coverage": 1.0
+    },
+    {
+      "model": "M0",
+      "method": "random",
+      "seed": 1007,
+      "responses": 24,
+      "switched": false,
+      "brier": 0.04728198985714219,
+      "credible_coverage": 1.0
+    },
+    {
+      "model": "M0",
+      "method": "random",
+      "seed": 1008,
+      "responses": 24,
+      "switched": false,
+      "brier": 0.10211273776955598,
+      "credible_coverage": 1.0
+    },
+    {
+      "model": "M0",
+      "method": "random",
+      "seed": 1009,
+      "responses": 24,
+      "switched": false,
+      "brier": 0.08162977091931507,
+      "credible_coverage": 1.0
+    },
+    {
+      "model": "M0",
+      "method": "random",
+      "seed": 1010,
+      "responses": 24,
+      "switched": false,
+      "brier": 0.023639996885044572,
+      "credible_coverage": 0.0
+    },
+    {
+      "model": "M0",
+      "method": "random",
+      "seed": 1011,
+      "responses": 24,
+      "switched": true,
+      "brier": 0.16893033481274014,
+      "credible_coverage": 1.0
+    },
+    {
+      "model": "M0",
+      "method": "balanced",
+      "seed": 1000,
+      "responses": 24,
+      "switched": true,
+      "brier": 0.20005312235226538,
+      "credible_coverage": 1.0
+    },
+    {
+      "model": "M0",
+      "method": "balanced",
+      "seed": 1001,
+      "responses": 24,
+      "switched": true,
+      "brier": 0.20733231909420138,
+      "credible_coverage": 1.0
+    },
+    {
+      "model": "M0",
+      "method": "balanced",
+      "seed": 1002,
+      "responses": 24,
+      "switched": true,
+      "brier": 0.21947781873358715,
+      "credible_coverage": 1.0
+    },
+    {
+      "model": "M0",
+      "method": "balanced",
+      "seed": 1003,
+      "responses": 24,
+      "switched": false,
+      "brier": 0.19586772526482168,
+      "credible_coverage": 1.0
+    },
+    {
+      "model": "M0",
+      "method": "balanced",
+      "seed": 1004,
+      "responses": 24,
+      "switched": true,
+      "brier": 0.24385501337099338,
+      "credible_coverage": 1.0
+    },
+    {
+      "model": "M0",
+      "method": "balanced",
+      "seed": 1005,
+      "responses": 24,
+      "switched": true,
+      "brier": 0.19979557878471166,
+      "credible_coverage": 1.0
+    },
+    {
+      "model": "M0",
+      "method": "balanced",
+      "seed": 1006,
+      "responses": 24,
+      "switched": true,
+      "brier": 0.17027712588263308,
+      "credible_coverage": 1.0
+    },
+    {
+      "model": "M0",
+      "method": "balanced",
+      "seed": 1007,
+      "responses": 24,
+      "switched": true,
+      "brier": 0.1449392763166305,
+      "credible_coverage": 1.0
+    },
+    {
+      "model": "M0",
+      "method": "balanced",
+      "seed": 1008,
+      "responses": 24,
+      "switched": true,
+      "brier": 0.18361537581725532,
+      "credible_coverage": 1.0
+    },
+    {
+      "model": "M0",
+      "method": "balanced",
+      "seed": 1009,
+      "responses": 24,
+      "switched": true,
+      "brier": 0.1477985006909507,
+      "credible_coverage": 1.0
+    },
+    {
+      "model": "M0",
+      "method": "balanced",
+      "seed": 1010,
+      "responses": 24,
+      "switched": true,
+      "brier": 0.249264071782753,
+      "credible_coverage": 0.5
+    },
+    {
+      "model": "M0",
+      "method": "balanced",
+      "seed": 1011,
+      "responses": 24,
+      "switched": true,
+      "brier": 0.2063366847789246,
+      "credible_coverage": 1.0
+    },
+    {
+      "model": "M1",
+      "method": "EIG",
+      "seed": 1000,
+      "responses": 24,
+      "switched": false,
+      "brier": 0.1992525029567146,
+      "credible_coverage": 0.0
+    },
+    {
+      "model": "M1",
+      "method": "EIG",
+      "seed": 1001,
+      "responses": 24,
+      "switched": false,
+      "brier": 0.19831747640596253,
+      "credible_coverage": 0.0
+    },
+    {
+      "model": "M1",
+      "method": "EIG",
+      "seed": 1002,
+      "responses": 24,
+      "switched": false,
+      "brier": 0.1988304055742002,
+      "credible_coverage": 0.5
+    },
+    {
+      "model": "M1",
+      "method": "EIG",
+      "seed": 1003,
+      "responses": 24,
+      "switched": true,
+      "brier": 0.21161257342451922,
+      "credible_coverage": 1.0
+    },
+    {
+      "model": "M1",
+      "method": "EIG",
+      "seed": 1004,
+      "responses": 24,
+      "switched": false,
+      "brier": 0.24522858051009241,
+      "credible_coverage": 0.5
+    },
+    {
+      "model": "M1",
+      "method": "EIG",
+      "seed": 1005,
+      "responses": 24,
+      "switched": false,
+      "brier": 0.22079054389551275,
+      "credible_coverage": 0.0
+    },
+    {
+      "model": "M1",
+      "method": "EIG",
+      "seed": 1006,
+      "responses": 24,
+      "switched": false,
+      "brier": 0.23838855116245136,
+      "credible_coverage": 0.5
+    },
+    {
+      "model": "M1",
+      "method": "EIG",
+      "seed": 1007,
+      "responses": 24,
+      "switched": true,
+      "brier": 0.19309394033811933,
+      "credible_coverage": 1.0
+    },
+    {
+      "model": "M1",
+      "method": "EIG",
+      "seed": 1008,
+      "responses": 24,
+      "switched": false,
+      "brier": 0.2071163323978491,
+      "credible_coverage": 0.0
+    },
+    {
+      "model": "M1",
+      "method": "EIG",
+      "seed": 1009,
+      "responses": 24,
+      "switched": false,
+      "brier": 0.17639574921654855,
+      "credible_coverage": 0.5
+    },
+    {
+      "model": "M1",
+      "method": "EIG",
+      "seed": 1010,
+      "responses": 24,
+      "switched": true,
+      "brier": 0.2823752848865061,
+      "credible_coverage": 1.0
+    },
+    {
+      "model": "M1",
+      "method": "EIG",
+      "seed": 1011,
+      "responses": 24,
+      "switched": false,
+      "brier": 0.18299727594330786,
+      "credible_coverage": 0.0
+    },
+    {
+      "model": "M1",
+      "method": "random",
+      "seed": 1000,
+      "responses": 24,
+      "switched": false,
+      "brier": 0.13573159946146052,
+      "credible_coverage": 0.5
+    },
+    {
+      "model": "M1",
+      "method": "random",
+      "seed": 1001,
+      "responses": 24,
+      "switched": false,
+      "brier": 0.11245695443486108,
+      "credible_coverage": 0.5
+    },
+    {
+      "model": "M1",
+      "method": "random",
+      "seed": 1002,
+      "responses": 24,
+      "switched": false,
+      "brier": 0.10965839951207763,
+      "credible_coverage": 0.5
+    },
+    {
+      "model": "M1",
+      "method": "random",
+      "seed": 1003,
+      "responses": 24,
+      "switched": false,
+      "brier": 0.03510141753698121,
+      "credible_coverage": 0.5
+    },
+    {
+      "model": "M1",
+      "method": "random",
+      "seed": 1004,
+      "responses": 24,
+      "switched": false,
+      "brier": 0.11060088746316882,
+      "credible_coverage": 0.5
+    },
+    {
+      "model": "M1",
+      "method": "random",
+      "seed": 1005,
+      "responses": 24,
+      "switched": false,
+      "brier": 0.07885405633583016,
+      "credible_coverage": 0.5
+    },
+    {
+      "model": "M1",
+      "method": "random",
+      "seed": 1006,
+      "responses": 24,
+      "switched": false,
+      "brier": 0.030830051224980656,
+      "credible_coverage": 0.5
+    },
+    {
+      "model": "M1",
+      "method": "random",
+      "seed": 1007,
+      "responses": 24,
+      "switched": false,
+      "brier": 0.06276984826516237,
+      "credible_coverage": 0.5
+    },
+    {
+      "model": "M1",
+      "method": "random",
+      "seed": 1008,
+      "responses": 24,
+      "switched": false,
+      "brier": 0.10211273776955598,
+      "credible_coverage": 0.5
+    },
+    {
+      "model": "M1",
+      "method": "random",
+      "seed": 1009,
+      "responses": 24,
+      "switched": false,
+      "brier": 0.12251830536060947,
+      "credible_coverage": 0.5
+    },
+    {
+      "model": "M1",
+      "method": "random",
+      "seed": 1010,
+      "responses": 24,
+      "switched": false,
+      "brier": 0.023639996885044572,
+      "credible_coverage": 0.5
+    },
+    {
+      "model": "M1",
+      "method": "random",
+      "seed": 1011,
+      "responses": 24,
+      "switched": true,
+      "brier": 0.13922328325427438,
+      "credible_coverage": 1.0
+    },
+    {
+      "model": "M1",
+      "method": "balanced",
+      "seed": 1000,
+      "responses": 24,
+      "switched": false,
+      "brier": 0.16544357079331343,
+      "credible_coverage": 0.5
+    },
+    {
+      "model": "M1",
+      "method": "balanced",
+      "seed": 1001,
+      "responses": 24,
+      "switched": false,
+      "brier": 0.21626752663426063,
+      "credible_coverage": 0.0
+    },
+    {
+      "model": "M1",
+      "method": "balanced",
+      "seed": 1002,
+      "responses": 24,
+      "switched": true,
+      "brier": 0.19290163513203348,
+      "credible_coverage": 1.0
+    },
+    {
+      "model": "M1",
+      "method": "balanced",
+      "seed": 1003,
+      "responses": 24,
+      "switched": true,
+      "brier": 0.21048420281275929,
+      "credible_coverage": 1.0
+    },
+    {
+      "model": "M1",
+      "method": "balanced",
+      "seed": 1004,
+      "responses": 24,
+      "switched": true,
+      "brier": 0.22121314487670865,
+      "credible_coverage": 1.0
+    },
+    {
+      "model": "M1",
+      "method": "balanced",
+      "seed": 1005,
+      "responses": 24,
+      "switched": true,
+      "brier": 0.20652330306828867,
+      "credible_coverage": 1.0
+    },
+    {
+      "model": "M1",
+      "method": "balanced",
+      "seed": 1006,
+      "responses": 24,
+      "switched": true,
+      "brier": 0.24766769563758265,
+      "credible_coverage": 1.0
+    },
+    {
+      "model": "M1",
+      "method": "balanced",
+      "seed": 1007,
+      "responses": 24,
+      "switched": false,
+      "brier": 0.20143501076570525,
+      "credible_coverage": 0.5
+    },
+    {
+      "model": "M1",
+      "method": "balanced",
+      "seed": 1008,
+      "responses": 24,
+      "switched": true,
+      "brier": 0.20013391275675999,
+      "credible_coverage": 1.0
+    },
+    {
+      "model": "M1",
+      "method": "balanced",
+      "seed": 1009,
+      "responses": 24,
+      "switched": true,
+      "brier": 0.1785930956014901,
+      "credible_coverage": 1.0
+    },
+    {
+      "model": "M1",
+      "method": "balanced",
+      "seed": 1010,
+      "responses": 24,
+      "switched": true,
+      "brier": 0.2045419341618572,
+      "credible_coverage": 1.0
+    },
+    {
+      "model": "M1",
+      "method": "balanced",
+      "seed": 1011,
+      "responses": 24,
+      "switched": true,
+      "brier": 0.21114514184241853,
+      "credible_coverage": 0.5
+    }
+  ],
+  "summary": [
+    {
+      "model": "M0",
+      "method": "EIG",
+      "switch_rate": 0.0,
+      "brier": 0.1804861593869421,
+      "credible_coverage": 1.0
+    },
+    {
+      "model": "M0",
+      "method": "random",
+      "switch_rate": 0.16666666666666666,
+      "brier": 0.08568344161413279,
+      "credible_coverage": 0.9166666666666666
+    },
+    {
+      "model": "M0",
+      "method": "balanced",
+      "switch_rate": 0.9166666666666666,
+      "brier": 0.19738438440581066,
+      "credible_coverage": 0.9583333333333334
+    },
+    {
+      "model": "M1",
+      "method": "EIG",
+      "switch_rate": 0.25,
+      "brier": 0.21286660139264868,
+      "credible_coverage": 0.4166666666666667
+    },
+    {
+      "model": "M1",
+      "method": "random",
+      "switch_rate": 0.08333333333333333,
+      "brier": 0.08862479479200058,
+      "credible_coverage": 0.5416666666666666
+    },
+    {
+      "model": "M1",
+      "method": "balanced",
+      "switch_rate": 0.75,
+      "brier": 0.20469584784026482,
+      "credible_coverage": 0.7916666666666666
+    }
+  ]
+}

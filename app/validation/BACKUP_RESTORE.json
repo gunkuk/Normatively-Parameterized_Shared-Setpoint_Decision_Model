@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "tables": [
+    "decision_cycles",
+    "elicitation_trials",
+    "model_policies"
+  ],
+  "source_counts": [
+    "6",
+    "1",
+    "4"
+  ],
+  "restored_counts": [
+    "6",
+    "1",
+    "4"
+  ],
+  "scope": "Fresh temporary database restored with pg_restore; no original database deletion"
+}
