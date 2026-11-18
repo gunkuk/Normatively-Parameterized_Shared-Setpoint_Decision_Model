@@ -9,6 +9,7 @@ from npsdm_app import db, api
 
 @pytest.fixture
 def client(monkeypatch):
+    monkeypatch.setattr(api.acquisition, "prefetch", lambda *args: None)
     engine = create_engine(
         "sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool
     )
@@ -128,7 +129,9 @@ def test_operational_modes_and_actions(client, mode):
     a = client.get(
         "/api/v1/analytics/summary", params=dict(zone_id=z, mode=mode)
     ).json()
-    assert a["decision_count"] == 1 and sum(b["person_seconds"] for b in a["buckets"]) == pytest.approx(2700)
+    assert a["decision_count"] == 1 and sum(
+        b["person_seconds"] for b in a["buckets"]
+    ) == pytest.approx(2700)
     opposite = "REPLAY" if mode == "DEMO" else "DEMO"
     assert (
         client.get(
@@ -304,3 +307,15 @@ def test_retention_preview_apply_and_scope(client):
         retain(c, "a", 365, apply=True)
         assert len(db.rows(c, "environment_readings", "a")) == 0
         assert len(db.rows(c, "environment_readings", "b")) == 1
+
+
+def test_first_question_is_immediately_ready(client):
+    r = client.post("/api/v1/elicitation/sessions", json={"time_budget_seconds": 0})
+    assert r.status_code == 200
+    s = r.json()
+    assert s["status"] == "READY"
+    assert s["question"]["selection_method"] == "fixed_intro_v2"
+    assert s["question"]["scenario"]["n"] == 5
+    assert s["question"]["temperature_difference"]["mean_c"] == pytest.approx(
+        [0.6, 0.8]
+    )

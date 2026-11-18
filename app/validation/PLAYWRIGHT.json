@@ -115,12 +115,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 2439,
+                  "duration": 3378,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-11-17T14:39:36.510Z",
+                  "startTime": "2026-11-18T13:01:54.790Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -130,7 +130,7 @@
           ],
           "id": "078afe649bee3f2d7b39-50a2316bb7eafd7f19e3",
           "file": "operator.spec.ts",
-          "line": 5,
+          "line": 8,
           "column": 1
         },
         {
@@ -149,12 +149,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 250,
+                  "duration": 386,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-11-17T14:39:39.137Z",
+                  "startTime": "2026-11-18T13:01:58.390Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -164,7 +164,41 @@
           ],
           "id": "078afe649bee3f2d7b39-7f955e13a700ffd9a532",
           "file": "operator.spec.ts",
-          "line": 15,
+          "line": 65,
+          "column": 1
+        },
+        {
+          "title": "Scenario-first question, utility drilldown and requested fonts",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2333,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-18T13:01:58.788Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "078afe649bee3f2d7b39-199e67a3ed7e8184c3c3",
+          "file": "operator.spec.ts",
+          "line": 74,
           "column": 1
         }
       ]
@@ -172,9 +206,9 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-11-17T14:39:36.118Z",
-    "duration": 3398.648,
-    "expected": 2,
+    "startTime": "2026-11-18T13:01:54.244Z",
+    "duration": 7022.314,
+    "expected": 3,
     "skipped": 0,
     "unexpected": 0,
     "flaky": 0

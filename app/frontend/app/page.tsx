@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
+import { QuestionPanel } from "@/components/question";
 type Json = Record<string, any>;
 const tabs = [
   "Overview",
@@ -153,7 +154,8 @@ export default function Home() {
       });
   }, [token]);
   useEffect(() => {
-    if (!session || state?.status !== "COMPUTING") return;
+    if (!session || !["COMPUTING", "READY"].includes(state?.status ?? ""))
+      return;
     const timer = setInterval(() => {
       api(`/elicitation/${session}/next-or-response`)
         .then(setState)
@@ -172,6 +174,38 @@ export default function Home() {
     });
     setResult(await api(`/elicitation/${session}/results`));
     await next();
+  }
+  async function startDemo() {
+    const z = await api("/sites/zones", "POST", {
+      site_name: "가상 체험 건물",
+      name: "첫 체험 공간",
+    });
+    const p = await api("/policies/draft", "POST", {
+      zone_id: z.id,
+      kind: "COMMON_FIXED",
+      epsilon: 1,
+      fallback_epsilon: 1,
+      rationale:
+        "사용자가 Overview에서 예시 정책 승인 후 DEMO 실행을 선택함. 추정값이 아닌 체험용 기준.",
+    });
+    await api(`/policies/${p.id}/approve`, "POST");
+    const data = await api(`/demo/seed?zone_id=${z.id}`, "POST");
+    const d = await api("/operations/decide", "POST", {
+      zone_id: z.id,
+      policy_id: p.id,
+      operation_mode: "DEMO",
+      at: data.at,
+    });
+    await refresh();
+    setZone(z.id);
+    setPolicy(p.id);
+    setMode("DEMO");
+    setAt(data.at);
+    setDecision(d);
+    setTab("Operation");
+    setMessage(
+      "가상 체험을 준비했습니다. 아래 권고를 확인하고 승인·적용 기록 흐름을 체험하세요.",
+    );
   }
   async function exportRun() {
     const r = await fetch(`/api/v1/exports/${session}`, {
@@ -272,53 +306,173 @@ export default function Home() {
         )}
         {tab === "Overview" && (
           <>
-            <div className="stats">
-              {[
-                ["운영 공간", zones.length],
-                ["등록 정책", policies.length],
-                ["기록된 결정", history.length],
-                [
-                  "질문 후보",
-                  settings
-                    ? `${((2400 * (Math.round((settings.settings.question_temperature_max_c - settings.settings.question_temperature_min_c) / settings.settings.question_temperature_step_c) + 1) * Math.round((settings.settings.question_temperature_max_c - settings.settings.question_temperature_min_c) / settings.settings.question_temperature_step_c)) / 2 / 1e6).toFixed(2)}M`
-                    : "—",
-                ],
-              ].map(([label, value]) => (
-                <div className="stat" key={label}>
-                  <span className="muted">{label}</span>
-                  <strong>{value}</strong>
-                </div>
-              ))}
-            </div>
-            <div className="notice">
-              이 앱은 모델 기반 의사결정 지원 도구입니다. 예측 효용, 실제
-              측정값, 사람의 승인과 적용을 분리해서 기록합니다.
-            </div>
+            <section className="card welcome">
+              <span className="eyebrow">처음 사용하는 분을 위한 안내</span>
+              <h2>서로 다른 희망 온도, 하나의 공유 온도</h2>
+              <p>
+                어떤 사람은 22°C를, 다른 사람은 26°C를 원할 때 모두에게 같은
+                온도를 적용해야 합니다. 이 앱은{" "}
+                <strong>누구의 불편을 얼마나 우선할지</strong> 당신의 선택으로
+                알아보고, 그 기준으로 공간의 권고 온도를 계산합니다.
+              </p>
+              <p>
+                결과는 자동 제어 명령이 아닙니다. 운영자가 검토하고 승인한 뒤
+                적용 여부를 따로 기록합니다.
+              </p>
+              <div className="actions">
+                <Button
+                  onClick={() =>
+                    run(async () => {
+                      const s = await api("/elicitation/sessions", "POST", {
+                        time_budget_seconds: 0,
+                        seed: 17,
+                      });
+                      setSession(s.id);
+                      setState(s);
+                      setResult(null);
+                      setTab("Elicitation");
+                    })
+                  }
+                >
+                  데이터 없이 첫 질문 체험
+                </Button>
+                <Button
+                  variant="outline"
+                  disabled={busy || user.role !== "Admin"}
+                  onClick={() => run(startDemo)}
+                >
+                  예시 정책 승인 후 DEMO 실행
+                </Button>
+              </div>
+              <p className="muted">
+                DEMO 버튼은 ε=1인 예시 정책을 승인하고 가상 데이터로 한 번
+                계산합니다. 선호 추정 결과가 아니며 실제 설비나 실제 관측에
+                영향을 주지 않습니다. Admin 권한이 필요합니다.
+              </p>
+            </section>
             <div className="grid">
               <section className="card">
-                <h2>01 · 우선순위 알아보기</h2>
+                <h2>이 앱에서 얻게 되는 것</h2>
                 <p>
-                  공통 ε부터 추정합니다. 서로 다른 구간의 엄격한 선호 제약이
-                  충돌할 때만 구간별 추정으로 전환합니다.
+                  <strong>① 선택 기준 ε</strong>
+                  <br />
+                  평균과 가장 불리한 사람 사이에서 어떤 결정을 선호하는지
+                  나타냅니다. 정답이나 성향 점수가 아닙니다.
                 </p>
-                <Button onClick={() => setTab("Elicitation")}>
-                  선호 추정 시작
-                </Button>
+                <p>
+                  <strong>② 권고 온도</strong>
+                  <br />
+                  현재 사람들의 희망 온도와 승인한 기준을 이용해 계산합니다.
+                </p>
+                <p>
+                  <strong>③ 결정의 근거와 이력</strong>
+                  <br />
+                  권고·승인·실제 적용 보고·실내 측정값을 각각 확인합니다.
+                </p>
               </section>
               <section className="card">
-                <h2>02 · 운영 결정 검토</h2>
+                <h2>지금 시작하려면</h2>
                 <p>
-                  공간과 데이터를 확인하고, 승인된 정책으로 권고 온도를
-                  계산합니다.
+                  선호 질문만 체험하려면 준비물이 없습니다. 실제 운영에는 공간
+                  정보, 현재 재실자와 각자의 최근 희망 온도가 필요합니다.
                 </p>
-                <Button variant="secondary" onClick={() => setTab("Operation")}>
-                  운영 콘솔 열기
-                </Button>
+                <p className="notice">
+                  가상 데이터(DEMO)로 흐름을 익힌 뒤 실제 데이터를 등록하세요.
+                  실내 온도만으로는 재실자의 희망 온도를 알 수 없습니다.
+                </p>
+                <p className="muted">
+                  현재 등록: 공간 {zones.length}개 · 정책 {policies.length}개 ·
+                  결정 {history.length}건
+                </p>
               </section>
             </div>
             <section className="card">
-              <h2>최근 권고</h2>
-              <History zones={zones} rows={history.slice(-8).reverse()} />
+              <h2>처음부터 실제 운영까지</h2>
+              <ol className="onboarding">
+                {[
+                  [
+                    "1",
+                    "선호 선택",
+                    "Elicitation",
+                    "가상 그룹의 두 온도 중 하나를 선택합니다. 답변에서 공통 기준을 추정하고, 필요한 경우 그룹별 기준을 따로 보여줍니다.",
+                  ],
+                  [
+                    "2",
+                    "공간 만들기",
+                    "Buildings / Zones",
+                    "건물·공간과 허용 온도 범위를 등록합니다. 여기서 만든 공간이 데이터와 정책의 기준이 됩니다.",
+                  ],
+                  [
+                    "3",
+                    "사람·희망 온도 등록",
+                    "Data ingest",
+                    "누가 재실 중인지와 각자의 희망 온도를 CSV·JSON으로 등록합니다. DEMO는 이 단계를 가상 데이터로 대신합니다.",
+                  ],
+                  [
+                    "4",
+                    "정책 검토·승인",
+                    "Policies",
+                    "추정 결과 또는 명시적으로 정한 기준을 검토하고 승인합니다. 미식별 그룹의 대체 기준도 따로 지정합니다.",
+                  ],
+                  [
+                    "5",
+                    "온도 계산·처리 기록",
+                    "Operation",
+                    "공간·모드·승인 정책을 선택해 계산합니다. 승인했다는 사실과 실제 적용했다는 사실을 구분해 기록합니다.",
+                  ],
+                  [
+                    "6",
+                    "변화 확인·내보내기",
+                    "Analytics",
+                    "권고·적용·측정 온도와 유효 관측시간을 확인합니다. 추정 세션 화면에서 기록 ZIP을 내려받을 수 있습니다.",
+                  ],
+                ].map(([num, title, target, description]) => (
+                  <li key={num}>
+                    <span className="step-number">{num}</span>
+                    <div>
+                      <h3>{title}</h3>
+                      <p>{description}</p>
+                      <Button variant="outline" onClick={() => setTab(target)}>
+                        {title} 화면 열기
+                      </Button>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </section>
+            <section className="card">
+              <h2>운영 모드 선택하기</h2>
+              <table>
+                <thead>
+                  <tr>
+                    <th>모드</th>
+                    <th>언제 쓰나요?</th>
+                    <th>데이터</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>DEMO</td>
+                    <td>실제 자료 없이 사용 흐름 체험</td>
+                    <td>가상</td>
+                  </tr>
+                  <tr>
+                    <td>REPLAY</td>
+                    <td>과거 시점의 자료로 결정을 다시 계산</td>
+                    <td>실제 입력 자료</td>
+                  </tr>
+                  <tr>
+                    <td>SHADOW</td>
+                    <td>현재 자료로 권고만 비교</td>
+                    <td>실제 입력 자료</td>
+                  </tr>
+                  <tr>
+                    <td>ASSISTED_LIVE</td>
+                    <td>운영자가 승인하고 적용·확인을 별도 기록</td>
+                    <td>실제 입력 자료</td>
+                  </tr>
+                </tbody>
+              </table>
             </section>
           </>
         )}
@@ -376,10 +530,11 @@ export default function Home() {
         {tab === "Elicitation" && (
           <>
             <section className="card">
-              <h2>ε 선호 추정</h2>
+              <h2>공유 온도 선택으로 우선순위 알아보기</h2>
               <p className="muted">
-                ε는 불리한 사람의 효용에 부여하는 규범적 우선순위를 조정합니다.
-                질문은 효율성과 형평성의 교환관계가 아닐 수도 있습니다.
+                가상 그룹마다 제시되는 두 온도 중 더 적절한 안을 선택하세요. 이
+                선택을 바탕으로 평균적인 만족과 가장 불리한 사람을 얼마나
+                우선할지 나타내는 ε를 추정합니다. 첫 질문은 바로 표시됩니다.
               </p>
               <div className="grid">
                 <div>
@@ -496,10 +651,11 @@ export default function Home() {
             </section>
             {state?.status === "COMPUTING" && (
               <section className="card" role="status">
-                <h2>전체 후보의 정보이득 계산 중</h2>
+                <h2>선택하신 응답의 다음 질문을 준비하고 있습니다</h2>
                 <p>
-                  모든 후보를 평가합니다. 첫 전체 계산 실측 약 377초이며
-                  시스템·사후분포에 따라 달라집니다.
+                  A/B 응답별 선계산이 아직 끝나지 않았습니다. 완료된 정확한
+                  결과만 사용하며, 이후 같은 응답 경로에서는 캐시를 바로
+                  불러옵니다.
                 </p>
                 <progress
                   aria-label="후보 평가 진행률"
@@ -520,68 +676,12 @@ export default function Home() {
                 </div>
               )}
             {q && state?.status === "READY" && (
-              <section>
-                <h2>어떤 공유 온도를 선호하나요?</h2>
-                <div className="grid">
-                  {q.display_order.map((ix: number, pos: number) => (
-                    <article key={ix} className="card choice">
-                      <span className="eyebrow">
-                        OPTION {pos === 0 ? "LEFT" : "RIGHT"}
-                      </span>
-                      <div className="temperature">
-                        {q.temperatures[ix].toFixed(1)}
-                        <small>°C</small>
-                      </div>
-                      {["efficiency", "equity", "equality", "total"].map(
-                        (m) => (
-                          <p key={m}>
-                            {m}: <strong>{q.metrics[m][ix].toFixed(4)}</strong>
-                          </p>
-                        ),
-                      )}
-                      <details>
-                        <summary>익명 개인별 모델 효용</summary>
-                        {q.utilities[ix].map((v: number, i: number) => (
-                          <div key={i}>
-                            <span className="muted">
-                              참여자 {i + 1}: {v.toFixed(3)}
-                            </span>
-                            <div className="bar">
-                              <span style={{ width: `${v * 100}%` }} />
-                            </div>
-                          </div>
-                        ))}
-                      </details>
-                      <Button
-                        disabled={busy}
-                        onClick={() => run(() => answer(ix))}
-                      >
-                        이 온도 선택
-                      </Button>
-                    </article>
-                  ))}
-                </div>
-                <div className="notice">
-                  오른쪽−왼쪽 변화: 평균{" "}
-                  {(
-                    q.metrics.efficiency[q.display_order[1]] -
-                    q.metrics.efficiency[q.display_order[0]]
-                  ).toFixed(4)}
-                  , 최저{" "}
-                  {(
-                    q.metrics.equity[q.display_order[1]] -
-                    q.metrics.equity[q.display_order[0]]
-                  ).toFixed(4)}
-                  . 모델 효용이며 실제 쾌적감 측정값이 아닙니다.
-                </div>
-                <Button
-                  variant="outline"
-                  disabled={busy}
-                  onClick={() => run(() => answer("skip"))}
-                >
-                  건너뛰기 — 선호 응답으로 사용하지 않음
-                </Button>
-              </section>
+              <QuestionPanel
+                key={q.id}
+                question={q}
+                busy={busy}
+                onAnswer={(value) => run(() => answer(value))}
+              />
             )}
             {result && (
               <>

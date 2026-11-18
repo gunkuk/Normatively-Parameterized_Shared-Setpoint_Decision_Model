@@ -25,6 +25,8 @@ from .schemas import (
     ActionIn,
 )
 from .bank import Bank
+from .acquisition import Acquisition
+from .presentation import fixed_question, present
 from .science import utility, metrics
 from .inference import infer, sensitivity
 from .policy import fixed_regret
@@ -34,6 +36,7 @@ from .analytics import summary
 app = FastAPI(title="NPSDM Operator Console", version="1.0.0")
 workers = ThreadPoolExecutor(max_workers=1)
 mutex = threading.RLock()
+acquisition = Acquisition()
 
 
 @lru_cache
@@ -109,6 +112,8 @@ def startup():
                 )
                 db.replace(c, "elicitation_sessions", row["tenant_id"], row["id"], data)
 
+    acquisition.prefetch(bank(), [], fixed_question(bank()))
+
 
 @app.post("/api/v1/elicitation/{sid}/resume")
 def resume(sid: str, user=Depends(actor)):
@@ -117,9 +122,10 @@ def resume(sid: str, user=Depends(actor)):
         s = checked_session(c, user, sid, True)
         if s["status"] not in ["INTERRUPTED", "STOPPED", "FAILED"]:
             raise HTTPException(409, "Session is not resumable")
-        s["status"] = "IDLE"
+        s["status"] = "READY" if not s["trials"] and s.get("question") else "IDLE"
+        acquisition.retry(bank(), s["trials"])
         db.replace(c, "elicitation_sessions", user["tenant"], sid, s)
-    return {"status": "IDLE"}
+    return {"status": s["status"]}
 
 
 @app.get("/api/v1/me")
@@ -198,14 +204,16 @@ def create_session(body: SessionIn, user=Depends(actor)):
             **body.model_dump(),
             created_at=db.now(),
             trials=[],
-            status="IDLE",
+            status="READY",
+            acquisition_version="fixed-intro-speculative-v2",
             stage="COMMON",
             config_hash=SETTINGS.fingerprint,
-            question=None,
-            progress=0,
+            question=present(bank(), fixed_question(bank()), body.seed, 0),
+            progress=1,
         )
         sid = db.insert(c, "elicitation_sessions", user["tenant"], data)
         db.audit(c, user, "SESSION_CREATED", sid)
+    acquisition.prefetch(bank(), [], data["question"])
     return dict(id=sid, **data)
 
 
@@ -218,99 +226,54 @@ def checked_session(c, user, sid, lock=False):
     return s
 
 
-def selection_job(tenant, sid):
-    try:
-        with db.engine.begin() as c:
-            s = db.get(c, "elicitation_sessions", tenant, sid)["data"]
-        result = infer(bank(), s["trials"])
-        weights = np.asarray(result["common"]["weights"])
-        grid_weights = (
-            {g: np.asarray(v["weights"]) for g, v in result["grids"].items()}
-            if result["stage"] == "CONTEXTUAL"
-            else None
-        )
-
-        def progress(i, n):
-            if i % 20 == 0:
-                with db.engine.begin() as c:
-                    current = db.get(c, "elicitation_sessions", tenant, sid, True)[
-                        "data"
-                    ]
-                    if current["status"] == "STOPPED":
-                        raise InterruptedError("Session stopped by operator")
-                    current["progress"] = i / n
-                    db.replace(c, "elicitation_sessions", tenant, sid, current)
-
-        q = bank().select(
-            weights, [t["id"] for t in s["trials"]], grid_weights, progress
-        )
-        if q is not None:
-            group = bank().lookup[q["group_id"]]
-            q["desired"] = group["desired"]
-            q["temperatures"] = bank().temperatures[[q["a"], q["b"]]].tolist()
-            u = utility(q["temperatures"], group["desired"])
-            q["utilities"] = u.tolist()
-            q["metrics"] = {k: v.tolist() for k, v in metrics(u).items()}
-            seed = s["seed"] + len(s["trials"])
-            q["display_seed"] = seed
-            q["display_order"] = np.random.default_rng(seed).permutation(2).tolist()
-            q["label"] = "Which shared setpoint do you prefer?"
-            q["utility_interpretation"] = (
-                "Model-generated utility, not measured comfort"
-            )
-        with db.engine.begin() as c:
-            current = db.get(c, "elicitation_sessions", tenant, sid, True)["data"]
-            current.update(
-                question=q,
-                status=(
-                    "STOPPED"
-                    if current["status"] == "STOPPED"
-                    else (
-                        "TIME_BUDGET_ENDED"
-                        if current["time_budget_seconds"]
-                        and (
-                            datetime.now(timezone.utc)
-                            - datetime.fromisoformat(current["created_at"])
-                        ).total_seconds()
-                        >= current["time_budget_seconds"]
-                        else ("READY" if q and q["eig_bits"] > 1e-14 else "SATURATED")
-                    )
-                ),
-                progress=1,
-                stage=result["stage"],
-            )
-            db.replace(c, "elicitation_sessions", tenant, sid, current)
-    except InterruptedError:
-        return
-    except Exception as exc:
-        with db.engine.begin() as c:
-            current = db.get(c, "elicitation_sessions", tenant, sid, True)["data"]
-            current.update(status="FAILED", error=str(exc))
-            db.replace(c, "elicitation_sessions", tenant, sid, current)
-
-
 @app.get("/api/v1/elicitation/{sid}/next-or-response")
 def next_question(sid: str, user=Depends(actor)):
     permit(user, "Admin", "Researcher", "Operator")
     with mutex, db.engine.begin() as c:
         s = checked_session(c, user, sid, True)
-        if s["status"] == "IDLE":
+        if s["status"] in ["IDLE", "COMPUTING", "READY"]:
             elapsed = (
                 datetime.now(timezone.utc) - datetime.fromisoformat(s["created_at"])
             ).total_seconds()
             if s["time_budget_seconds"] and elapsed >= s["time_budget_seconds"]:
                 s["status"] = "TIME_BUDGET_ENDED"
-                db.replace(c, "elicitation_sessions", user["tenant"], sid, s)
-                return s
-            s["status"] = "COMPUTING"
-            s["progress"] = 0
+            elif s["status"] in ["IDLE", "COMPUTING"]:
+                hit, q = acquisition.get(bank(), s["trials"])
+                if hit:
+                    s.update(
+                        status="READY" if q and q["eig_bits"] > 1e-14 else "SATURATED",
+                        question=(
+                            present(bank(), q, s["seed"], len(s["trials"]))
+                            if q
+                            else None
+                        ),
+                        progress=1,
+                        delivery="precomputed_exact_cache",
+                    )
+                else:
+                    acquisition.ensure(bank(), [s["trials"]])
+                    job = acquisition.state(bank(), s["trials"])
+                    s.update(
+                        status="FAILED" if job["error"] else "COMPUTING",
+                        progress=job["progress"],
+                        error=job["error"],
+                        delivery="exact_computation_pending",
+                    )
             db.replace(c, "elicitation_sessions", user["tenant"], sid, s)
-            # Submission occurs after commit to avoid racing the worker's first read.
-            schedule = True
-        else:
-            schedule = False
-    if schedule:
-        workers.submit(selection_job, user["tenant"], sid)
+    if s["status"] == "READY" and s.get("question"):
+        s["question"] = present(bank(), s["question"], s["seed"], len(s["trials"]))
+        acquisition.prefetch(bank(), s["trials"], s["question"])
+        s["prefetch"] = {
+            str(y): dict(
+                ready=acquisition.get(
+                    bank(), s["trials"] + [dict(s["question"], response=y)]
+                )[0],
+                **acquisition.state(
+                    bank(), s["trials"] + [dict(s["question"], response=y)]
+                ),
+            )
+            for y in [0, 1]
+        }
     return s
 
 

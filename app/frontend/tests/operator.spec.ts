@@ -70,3 +70,53 @@ test("Invalid credentials remain blocked", async ({ page }) => {
     "Valid bearer token required",
   );
 });
+
+test("Scenario-first question, utility drilldown and requested fonts", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByLabel("로컬 접근 토큰").fill(token);
+  await page.getByRole("button", { name: "콘솔 연결" }).click();
+  await expect(
+    page.getByRole("heading", {
+      name: "서로 다른 희망 온도, 하나의 공유 온도",
+    }),
+  ).toBeVisible();
+  await page.screenshot({
+    path: "../validation/OVERVIEW_V2.png",
+    fullPage: true,
+  });
+  await page.getByRole("button", { name: "데이터 없이 첫 질문 체험" }).click();
+  await expect(
+    page.getByRole("heading", { name: "5명이 함께 사용할 온도를 정해주세요" }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("5명의 평균 온도차이", { exact: true }),
+  ).toHaveCount(2);
+  await expect(
+    page.getByText("가장 차이가 큰 사람의 온도차이", { exact: true }),
+  ).toHaveCount(2);
+  await expect(
+    page.getByRole("heading", { name: "사람 간 효용이 얼마나 고른가요?" }),
+  ).toHaveCount(0);
+  await page.getByText("익명 개인별 효용 그래프 보기", { exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "사람 간 효용이 얼마나 고른가요?" }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "참여자 1 상세정보" }).click();
+  await expect(page.locator("#person-detail")).toContainText("성별");
+  await expect(page.locator("#person-detail")).toContainText("연구 당시 나이");
+  await expect(page.locator("#person-detail")).toContainText("희망 온도");
+  await page.evaluate(() => document.fonts.ready);
+  expect(
+    await page.locator("body").evaluate((e) => getComputedStyle(e).fontFamily),
+  ).toBe('"Times New Roman", "Noto Sans KR"');
+  await page.screenshot({
+    path: "../validation/QUESTION_V2.png",
+    fullPage: true,
+  });
+  await page.getByRole("button", { name: "세션 종료", exact: true }).click();
+  await page.getByRole("button", { name: "Overview", exact: true }).click();
+  await page.getByRole("button", { name: "예시 정책 승인 후 DEMO 실행", exact: true }).click();
+  await expect(page.getByText("가상 체험을 준비했습니다.", { exact: false })).toBeVisible();
+});

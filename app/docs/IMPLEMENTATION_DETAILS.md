@@ -41,3 +41,17 @@ The default posterior uses 64 midpoint q nodes, with 32/128-node sensitivity vie
 Strict feasible sets use numerical exponential-polynomial root isolation; fixed-policy regret uses upper-envelope intervals and separate singleton tie values. The root tolerance is versioned and formal interval-arithmetic certification is not claimed. All-pair EIG remains exhaustive and independent of policy-only dominance reduction.
 
 Local deployment uses one queued API worker, PostgreSQL snapshot storage, provisioned per-tenant roles and loopback-only ports. A newly added root CI workflow is the only implementation file outside app/; it runs checks without modifying existing research code. Exact computation latency, field validation and deployment limits are separately disclosed.
+
+## 5. November 18 operator experience amendment
+
+The user explicitly changed acquisition delivery: the first question is a fixed introductory scenario (N5/R041, 22 versus 23 C when supported by the configured grid), not a claimed global-max-EIG question. Every subsequent question still uses exhaustive maximum EIG over the declared discrete posterior. The full original pair universe remains intact; the already presented introduction is excluded from reselection.
+
+At server startup, and while an actual question is displayed, compute both hypothetical A/B response branches one step ahead. A shared full-bank pass reuses each pair's likelihood and conditional entropy across the two posteriors. Four bounded group-scoring threads preserve deterministic ordered reduction. Speculative answers are never stored as actual trials. Only the branch matching the real response can be served. Skips use a distinct key and never masquerade as A/B responses.
+
+Completed results persist in the app_cache Docker volume. Keys include source/config identity, numerical implementation hashes and the ordered scientific answer history, excluding display orientation, timestamps and authentication. Identical model histories can reuse the same result. Interrupted computation is recomputed; completed atomic cache entries survive restart. Unfinished branches still require waiting; no instant-delivery guarantee is made. Failures require explicit resume rather than silently looping retries. Background speculative results may finish after the user stops and remain reusable.
+
+The question screen begins with the synthetic-group context. Primary numbers are mean absolute desired-versus-shared temperature difference and the largest individual's absolute difference, in Celsius. These are direct distances, not inverted/clipped utility or energy metrics. The exact original utility vectors still drive inference.
+
+Individual utility graphs and equality (1-Gini) appear only on expansion. Clicking a participant shows the source sex (0=female, 1=male), study-age and representative desired temperature; never names, original subject IDs, BMI or weight. Demographics are descriptive and are not inference features. This explicitly supersedes the original brief's prohibition of demographic labels, following the user's November 18 request. The changed presentation is versioned and has not been empirically calibrated for framing effects.
+
+Fonts are Times New Roman and locally bundled Noto Sans KR only. Latin text uses Times New Roman where installed, with Noto Sans KR as the supported fallback; no proprietary Times New Roman files are redistributed.

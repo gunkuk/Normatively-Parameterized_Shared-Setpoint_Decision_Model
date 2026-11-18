@@ -1,0 +1,23 @@
+{
+  "scope": "Fixed intro and both exact response branches in the deployed Docker app",
+  "branches": [
+    {
+      "response": 0,
+      "answer_to_next_question_seconds": 0.03558789996895939,
+      "question_id": "N5/R079:100:140",
+      "evaluated_candidates": 53172000,
+      "joint_compute_seconds": 59.19881161299418,
+      "exact": true
+    },
+    {
+      "response": 1,
+      "answer_to_next_question_seconds": 0.04156240005977452,
+      "question_id": "N10/R118:93:128",
+      "evaluated_candidates": 53172000,
+      "joint_compute_seconds": 59.19881458999589,
+      "exact": true
+    }
+  ],
+  "first_question_seconds": 2.0878864000551403,
+  "remaining_prefetch_wait_seconds": 48.20832129998598
+}
