@@ -686,3 +686,26 @@ summary {
     font-size: 22px;
   }
 }
+
+.workspace-nav {
+  margin: 0 0 20px;
+}
+.demo-entry p {
+  margin: 8px 0;
+}
+.survey-clock {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 14px;
+  padding: 10px 14px;
+  background: #edf4f2;
+  border-left: 3px solid var(--accent);
+}
+.survey-clock strong {
+  font-size: 26px;
+  font-variant-numeric: tabular-nums;
+}
+.survey-clock small {
+  color: var(--muted);
+}

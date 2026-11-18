@@ -226,16 +226,23 @@ def checked_session(c, user, sid, lock=False):
     return s
 
 
+def time_budget_ended(session):
+    return (
+        bool(session["time_budget_seconds"])
+        and (
+            datetime.now(timezone.utc) - datetime.fromisoformat(session["created_at"])
+        ).total_seconds()
+        >= session["time_budget_seconds"]
+    )
+
+
 @app.get("/api/v1/elicitation/{sid}/next-or-response")
 def next_question(sid: str, user=Depends(actor)):
     permit(user, "Admin", "Researcher", "Operator")
     with mutex, db.engine.begin() as c:
         s = checked_session(c, user, sid, True)
         if s["status"] in ["IDLE", "COMPUTING", "READY"]:
-            elapsed = (
-                datetime.now(timezone.utc) - datetime.fromisoformat(s["created_at"])
-            ).total_seconds()
-            if s["time_budget_seconds"] and elapsed >= s["time_budget_seconds"]:
+            if time_budget_ended(s):
                 s["status"] = "TIME_BUDGET_ENDED"
             elif s["status"] in ["IDLE", "COMPUTING"]:
                 hit, q = acquisition.get(bank(), s["trials"])
@@ -292,6 +299,8 @@ def answer(sid: str, body: Answer, user=Depends(actor)):
                     409, "Idempotency key reused for different response"
                 )
             return {"status": "ALREADY_RECORDED", "trial": previous[0]}
+        if s["status"] == "TIME_BUDGET_ENDED" or time_budget_ended(s):
+            raise HTTPException(409, "설문 시간이 끝났습니다. 이전 응답은 보존됩니다.")
         q = s.get("question")
         if s["status"] != "READY" or not q or q["id"] != body.question_id:
             raise HTTPException(409, "Question is stale or not ready")
@@ -339,6 +348,7 @@ def results(sid: str, user=Depends(actor)):
     with db.engine.connect() as c:
         s = checked_session(c, user, sid)
     result = infer(bank(), s["trials"])
+    result["response_count"] = sum(t["response"] in (0, 1) for t in s["trials"])
     result["sensitivity"] = sensitivity(bank(), s["trials"])
     result["fixed_policy"] = (
         s.get(

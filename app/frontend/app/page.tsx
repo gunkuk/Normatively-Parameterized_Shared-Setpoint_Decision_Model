@@ -4,17 +4,57 @@ import { Button } from "@/components/ui/button";
 import { ResultFigure } from "@/components/result";
 import { QuestionPanel } from "@/components/question";
 type Json = Record<string, any>;
-const tabs = [
-  "Overview",
-  "Elicitation",
-  "Policies",
-  "Buildings / Zones",
-  "Operation",
-  "Data ingest",
-  "Analytics",
-  "Research / Quality",
-  "Settings / Roles",
+const navigation = [
+  { label: "시작 안내", pages: ["Overview"] },
+  { label: "선호 추정", pages: ["Elicitation"] },
+  {
+    label: "운영",
+    pages: ["Operation", "Policies", "Buildings / Zones", "Data ingest"],
+  },
+  {
+    label: "분석·관리",
+    pages: ["Analytics", "Research / Quality", "Settings / Roles"],
+  },
 ];
+const pageNames: Record<string, string> = {
+  Operation: "온도 권고",
+  Policies: "정책",
+  "Buildings / Zones": "공간",
+  "Data ingest": "사람·희망 온도 등록",
+  Analytics: "운영 분석",
+  "Research / Quality": "연구·품질",
+  "Settings / Roles": "설정·권한",
+};
+function DemoEntry({
+  busy,
+  admin,
+  onDemo,
+}: {
+  busy: boolean;
+  admin: boolean;
+  onDemo: () => void;
+}) {
+  return (
+    <div className="notice demo-entry">
+      <strong>DEMO · 가상 데이터로 온도 권고 체험</strong>
+      <p>
+        가상 재실자와 희망 온도를 자동으로 등록하고, 예시 정책(ε = 1)으로 권고
+        온도를 계산합니다.
+      </p>
+      {admin ? (
+        <Button disabled={busy} onClick={onDemo}>
+          예시 정책 승인 후 DEMO 실행
+        </Button>
+      ) : (
+        <p>
+          예시 정책 승인은 관리자 권한이 필요합니다. 승인 정책이 있다면 운영
+          화면에서 공간 선택 → DEMO → 가상 데이터 생성 → 권고 온도 계산 순서로
+          진행하세요.
+        </p>
+      )}
+    </div>
+  );
+}
 function Detail({ data }: { data: unknown }) {
   return (
     <details>
@@ -43,7 +83,8 @@ export default function Home() {
   const [history, setHistory] = useState<Json[]>([]);
   const [report, setReport] = useState<Json | null>(null);
   const [settings, setSettings] = useState<Json | null>(null);
-  const [budget, setBudget] = useState("0");
+  const [budget, setBudget] = useState("300");
+  const [now, setNow] = useState(() => Date.now());
   const [period, setPeriod] = useState("daily");
   const [weightMode, setWeightMode] = useState("uniform_grid");
   const [weightJson, setWeightJson] = useState("{}");
@@ -126,15 +167,32 @@ export default function Home() {
     }, 2500);
     return () => clearInterval(timer);
   }, [session, state?.status, api]);
+  const activeSession = ["READY", "IDLE", "COMPUTING"].includes(state?.status);
+  const deadline = state?.time_budget_seconds
+    ? Date.parse(state.created_at) + state.time_budget_seconds * 1000
+    : null;
+  const remaining =
+    deadline === null ? null : Math.max(0, Math.ceil((deadline - now) / 1000));
+  useEffect(() => {
+    if (!activeSession || deadline === null) return;
+    setNow(Date.now());
+    const tick = window.setInterval(() => setNow(Date.now()), 250);
+    return () => window.clearInterval(tick);
+  }, [activeSession, deadline]);
   async function next() {
     setState(await api(`/elicitation/${session}/next-or-response`));
   }
   async function answer(response: number | string) {
-    await api(`/elicitation/${session}/next-or-response`, "POST", {
-      question_id: state?.question.id,
-      response,
-      request_id: crypto.randomUUID(),
-    });
+    try {
+      await api(`/elicitation/${session}/next-or-response`, "POST", {
+        question_id: state?.question.id,
+        response,
+        request_id: crypto.randomUUID(),
+      });
+    } catch (error) {
+      await next();
+      throw error;
+    }
     setResult(await api(`/elicitation/${session}/results`));
     await next();
   }
@@ -149,7 +207,7 @@ export default function Home() {
       epsilon: 1,
       fallback_epsilon: 1,
       rationale:
-        "사용자가 Overview에서 예시 정책 승인 후 DEMO 실행을 선택함. 추정값이 아닌 체험용 기준.",
+        "사용자가 예시 정책 승인 후 DEMO 실행을 선택함. 추정값이 아닌 체험용 기준.",
     });
     await api(`/policies/${p.id}/approve`, "POST");
     const data = await api(`/demo/seed?zone_id=${z.id}`, "POST");
@@ -217,13 +275,14 @@ export default function Home() {
         <div className="brand">NPSDM</div>
         <div className="subtitle">OPERATOR CONSOLE / 01</div>
         <nav className="nav" aria-label="주 메뉴">
-          {tabs.map((t) => (
+          {navigation.map(({ label, pages }) => (
             <button
-              key={t}
-              className={tab === t ? "active" : ""}
-              onClick={() => setTab(t)}
+              key={label}
+              className={pages.includes(tab) ? "active" : ""}
+              aria-current={pages.includes(tab) ? "true" : undefined}
+              onClick={() => setTab(pages[0])}
             >
-              {t}
+              {label}
             </button>
           ))}
         </nav>
@@ -267,6 +326,28 @@ export default function Home() {
             {message}
           </div>
         )}
+        {navigation
+          .filter(
+            (group) => group.pages.length > 1 && group.pages.includes(tab),
+          )
+          .map((group) => (
+            <nav
+              key={group.label}
+              className="workspace-nav actions"
+              aria-label={group.label + " 세부 메뉴"}
+            >
+              {group.pages.map((page) => (
+                <Button
+                  key={page}
+                  variant={tab === page ? "default" : "outline"}
+                  aria-current={tab === page ? "page" : undefined}
+                  onClick={() => setTab(page)}
+                >
+                  {pageNames[page]}
+                </Button>
+              ))}
+            </nav>
+          ))}
         {tab === "Overview" && (
           <>
             <section className="card welcome">
@@ -287,7 +368,7 @@ export default function Home() {
                   onClick={() =>
                     run(async () => {
                       const s = await api("/elicitation/sessions", "POST", {
-                        time_budget_seconds: 0,
+                        time_budget_seconds: 300,
                         seed: 17,
                       });
                       setSession(s.id);
@@ -563,6 +644,25 @@ export default function Home() {
               </div>
               {session && (
                 <>
+                  {activeSession && (
+                    <p
+                      className="survey-clock"
+                      role="timer"
+                      aria-label="설문 남은 시간"
+                    >
+                      남은 시간{" "}
+                      <strong>
+                        {remaining === null
+                          ? "무제한"
+                          : `${String(Math.floor(remaining / 60)).padStart(2, "0")}:${String(remaining % 60).padStart(2, "0")}`}
+                      </strong>
+                      <small>
+                        {remaining === 0
+                          ? "시간 종료 · 이전 응답은 결과 확인에서 볼 수 있습니다."
+                          : "다음 질문 계산 시간도 포함됩니다."}
+                      </small>
+                    </p>
+                  )}
                   <p className="muted">세션 {session}</p>
                   <div className="actions">
                     <Button
@@ -634,7 +734,10 @@ export default function Home() {
             {state &&
               !["IDLE", "READY", "COMPUTING"].includes(state.status) && (
                 <div className="notice">
-                  세션 상태: {state.status}
+                  세션 상태:{" "}
+                  {state.status === "TIME_BUDGET_ENDED"
+                    ? "시간 종료 · 00:00"
+                    : state.status}
                   <Detail data={state} />
                 </div>
               )}
@@ -642,20 +745,13 @@ export default function Home() {
               <QuestionPanel
                 key={q.id}
                 question={q}
-                busy={busy}
+                busy={busy || remaining === 0}
                 onAnswer={(value) => run(() => answer(value))}
               />
             )}
             {result && (
               <>
-                <ResultFigure
-                  result={result}
-                  count={
-                    (state?.trials ?? []).filter(
-                      (t: Json) => t.response === 0 || t.response === 1,
-                    ).length
-                  }
-                />
+                <ResultFigure result={result} count={result.response_count} />
                 <section className="card">
                   <h2>{result.stage} · 공통 ε 비교 기준</h2>
                   <Detail data={result.common} />
@@ -664,6 +760,13 @@ export default function Home() {
                     베이지안 credible set과 다릅니다. 구간 간 충돌은 실제 맥락별
                     도덕적 선호 차이를 증명하지 않습니다.
                   </div>
+                  {result.stage === "COMMON" && (
+                    <p className="muted">
+                      공통 ε로 설명할 수 없는 두 구간이 확인되면 구간별 추정으로
+                      전환합니다. 두 구간은 각각 응답을 설명할 수 있어야 하며,
+                      가능한 ε 범위가 서로 겹치지 않아야 합니다.
+                    </p>
+                  )}
                   <Detail data={result.deterministic} />
                   <h3>사전분포·응답 모형·적분 해상도 민감도</h3>
                   <table>
@@ -925,6 +1028,11 @@ export default function Home() {
           <>
             <section className="card">
               <h2>운영 입력</h2>
+              <DemoEntry
+                busy={busy}
+                admin={user.role === "Admin"}
+                onDemo={() => run(startDemo)}
+              />
               <div className="grid">
                 <div>
                   <ZoneSelect zones={zones} zone={zone} setZone={setZone} />
@@ -1005,16 +1113,28 @@ export default function Home() {
             {decision && (
               <section className="card">
                 <h2>권고 검토 · 아직 적용되지 않음</h2>
+                {decision.mode === "DEMO" && (
+                  <p className="notice">
+                    DEMO · 가상 재실자·희망 온도·실내 온도를 사용한 권고입니다.
+                    실내 온도는 시뮬레이션에서 생성한 값입니다.
+                  </p>
+                )}
                 <div className="stats">
                   <div className="stat">
                     권고<strong>{decision.recommended_c.toFixed(1)}°C</strong>
                   </div>
                   <div className="stat">
-                    실내 측정
+                    <span>
+                      {decision.mode === "DEMO"
+                        ? "모의 실내 온도"
+                        : "실내 측정"}
+                    </span>
                     <strong>
                       {decision.measured_environment?.indoor_temperature_c?.toFixed(
                         1,
                       ) ?? "없음"}
+                      {decision.measured_environment?.indoor_temperature_c !=
+                        null && "°C"}
                     </strong>
                   </div>
                   <div className="stat">
@@ -1101,7 +1221,13 @@ export default function Home() {
         )}
         {tab === "Data ingest" && (
           <section className="card">
-            <h2>실제·가상 데이터 가져오기</h2>
+            <h2>사람·희망 온도 등록</h2>
+            <DemoEntry
+              busy={busy}
+              admin={user.role === "Admin"}
+              onDemo={() => run(startDemo)}
+            />
+            <h3>파일 또는 직접 입력</h3>
             <p className="muted">
               시간대가 포함된 observed_at, zone_id, ACTUAL/SIMULATED
               data_origin과 출처 source를 명시하세요. 전체 요청을 검증한 후

@@ -79,3 +79,8 @@ CI regression: a run near Asia/Seoul midnight correctly split one 15-minute expo
 - PASS: saved question/result panels visually inspected for readable values, axes, legends, and no clipping. Publication captures use a 2x device pixel ratio.
 - Numerical algorithms unchanged; backend numerical tests are not rerun locally for this presentation-only change. The PR workflow runs its normal regression suite.
 - FIGURE_RESULT.png is a one-response automated UI example, not a human study result. Formal accessibility and journal acceptance are not certified.
+
+
+## Timer and operations navigation
+
+44 backend checks passed, including rejecting a late response before the next GET poll and preserving existing trials. The existing cross-grid fixture continues to enter CONTEXTUAL under verified disjoint constraints. Browser coverage includes a moving five-minute countdown, grouped navigation, and launching a demo recommendation from the data entry screen.

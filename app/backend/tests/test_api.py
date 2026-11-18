@@ -319,3 +319,26 @@ def test_first_question_is_immediately_ready(client):
     assert s["question"]["temperature_difference"]["mean_c"] == pytest.approx(
         [0.6, 0.8]
     )
+
+
+def test_expired_session_rejects_answer_before_poll(client):
+    session = client.post(
+        "/api/v1/elicitation/sessions", json={"time_budget_seconds": 300}
+    ).json()
+    sid = session["id"]
+    with db.engine.begin() as c:
+        session["created_at"] = "2020-01-01T00:00:00+00:00"
+        db.replace(c, "elicitation_sessions", "a", sid, session)
+    path = f"/api/v1/elicitation/{sid}/next-or-response"
+    posted = client.post(
+        path,
+        json={
+            "question_id": session["question"]["id"],
+            "response": 0,
+            "request_id": "late-test-response",
+        },
+    )
+    assert posted.status_code == 409
+    state = client.get(path).json()
+    assert state["status"] == "TIME_BUDGET_ENDED"
+    assert state["trials"] == []

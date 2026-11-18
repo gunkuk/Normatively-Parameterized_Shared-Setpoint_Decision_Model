@@ -14,20 +14,19 @@ test("Operator journey: zone, approved policy, demo, action, analytics, export",
   await expect(
     page.getByRole("heading", { name: "Overview", exact: true }),
   ).toBeVisible();
-  await page
-    .getByRole("button", { name: "Buildings / Zones", exact: true })
-    .click();
+  await page.getByRole("button", { name: "운영", exact: true }).click();
+  await page.getByRole("button", { name: "공간", exact: true }).click();
   await page.getByLabel("공간 이름").fill("E2E test zone " + Date.now());
   await page.getByRole("button", { name: "공간 등록", exact: true }).click();
   await expect(page.getByRole("status")).toContainText("공간을 등록");
-  await page.getByRole("button", { name: "Policies", exact: true }).click();
+  await page.getByRole("button", { name: "정책", exact: true }).click();
   await page.getByLabel("미식별·범위 밖 fallback ε (선택)").fill("1");
   await page.getByRole("button", { name: "검토용 초안 저장" }).click();
   await page.getByRole("button", { name: "이 정책 승인" }).last().click();
   await expect(
     page.getByText("APPROVED", { exact: true }).last(),
   ).toBeVisible();
-  await page.getByRole("button", { name: "Operation", exact: true }).click();
+  await page.getByRole("button", { name: "온도 권고", exact: true }).click();
   await page.getByLabel("승인 정책").selectOption({ index: 1 });
   await page.getByRole("button", { name: "가상 데이터 생성" }).click();
   await expect(page.getByRole("status")).toContainText("가상 관측");
@@ -42,13 +41,18 @@ test("Operator journey: zone, approved policy, demo, action, analytics, export",
     path: "../validation/OPERATION.png",
     fullPage: true,
   });
-  await page.getByRole("button", { name: "Analytics", exact: true }).click();
+  await page.getByRole("button", { name: "분석·관리", exact: true }).click();
   await page.getByRole("button", { name: "분석 조회" }).click();
   await expect(
     page.getByText("Asia/Seoul · DEMO", { exact: true }),
   ).toBeVisible();
-  await page.getByRole("button", { name: "Elicitation", exact: true }).click();
+  await page.getByRole("button", { name: "선호 추정", exact: true }).click();
+  await page.clock.install();
   await page.getByRole("button", { name: "새 세션 만들기" }).click();
+  const clock = page.getByRole("timer", { name: "설문 남은 시간" });
+  await expect(clock).toContainText(/0[45]:\d{2}/);
+  await page.clock.fastForward(2000);
+  await expect(clock).not.toContainText("05:00");
   await expect(page.getByRole("button", { name: "결과 확인" })).toBeVisible();
   await page.getByRole("button", { name: "결과 확인" }).click();
   await expect(
@@ -116,13 +120,17 @@ test("Scenario-first question, utility drilldown and requested fonts", async ({
     fullPage: true,
   });
   await page.getByRole("button", { name: "세션 종료", exact: true }).click();
-  await page.getByRole("button", { name: "Overview", exact: true }).click();
+  await page.getByRole("button", { name: "운영", exact: true }).click();
+  await page
+    .getByRole("button", { name: "사람·희망 온도 등록", exact: true })
+    .click();
   await page
     .getByRole("button", { name: "예시 정책 승인 후 DEMO 실행", exact: true })
     .click();
   await expect(
     page.getByText("가상 체험을 준비했습니다.", { exact: false }),
   ).toBeVisible();
+  await expect(page.getByText("모의 실내 온도", { exact: true })).toBeVisible();
 });
 
 test.describe("Publication captures at 2x resolution", () => {
