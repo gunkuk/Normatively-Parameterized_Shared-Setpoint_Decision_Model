@@ -1,0 +1,13 @@
+test_discussion_smoke_preserves_input_arguments (test_local_studies.LocalStudyTests.test_discussion_smoke_preserves_input_arguments) ... ok
+test_discussion_uses_current_evidence_directory (test_local_studies.LocalStudyTests.test_discussion_uses_current_evidence_directory) ... ok
+test_missing_private_study_fails_explicitly (test_local_studies.LocalStudyTests.test_missing_private_study_fails_explicitly) ... ok
+test_paper_does_not_require_private_studies (test_local_studies.LocalStudyTests.test_paper_does_not_require_private_studies) ... ok
+test_pcm_keeps_its_own_verifier (test_local_studies.LocalStudyTests.test_pcm_keeps_its_own_verifier) ... ok
+test_historical_groups_and_observations_are_recomputed (test_submission.SubmissionTests.test_historical_groups_and_observations_are_recomputed) ... ok
+test_input_hash_rejects_change (test_submission.SubmissionTests.test_input_hash_rejects_change) ... ok
+test_reference_temperature_is_not_used_to_select_decision (test_submission.SubmissionTests.test_reference_temperature_is_not_used_to_select_decision) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.215s
+
+OK

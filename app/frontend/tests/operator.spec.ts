@@ -1,0 +1,187 @@
+import { test, expect } from "@playwright/test";
+import { readFileSync } from "node:fs";
+import path from "node:path";
+const token = readFileSync(
+  path.resolve("../outputs/local-access-token.txt"),
+  "utf8",
+).trim();
+test("Operator journey: zone, approved policy, demo, action, analytics, export", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByLabel("로컬 접근 토큰").fill(token);
+  await page.getByRole("button", { name: "콘솔 연결" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Overview", exact: true }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "운영", exact: true }).click();
+  await page.getByRole("button", { name: "공간", exact: true }).click();
+  await page.getByLabel("공간 이름").fill("E2E test zone " + Date.now());
+  await page.getByRole("button", { name: "공간 등록", exact: true }).click();
+  await expect(page.getByRole("status")).toContainText("공간을 등록");
+  await page.getByRole("button", { name: "정책", exact: true }).click();
+  await page.getByLabel("미식별·범위 밖 fallback ε (선택)").fill("1");
+  await page.getByRole("button", { name: "검토용 초안 저장" }).click();
+  await page.getByRole("button", { name: "이 정책 승인" }).last().click();
+  await expect(
+    page.getByText("APPROVED", { exact: true }).last(),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "온도 권고", exact: true }).click();
+  await page.getByLabel("승인 정책").selectOption({ index: 1 });
+  await page.getByRole("button", { name: "가상 데이터 생성" }).click();
+  await expect(page.getByRole("status")).toContainText("가상 관측");
+  await page.getByRole("button", { name: "권고 온도 계산" }).click();
+  await expect(
+    page.getByRole("heading", { name: "권고 검토 · 아직 적용되지 않음" }),
+  ).toBeVisible();
+  await page.getByLabel("처리 근거").fill("E2E simulated approval");
+  await page.getByRole("button", { name: "승인", exact: true }).click();
+  await expect(page.getByRole("status")).toContainText("승인을 저장");
+  await page.screenshot({
+    path: "../validation/OPERATION.png",
+    fullPage: true,
+  });
+  await page.getByRole("button", { name: "분석·관리", exact: true }).click();
+  await page.getByRole("button", { name: "분석 조회" }).click();
+  await expect(
+    page.getByText("Asia/Seoul · DEMO", { exact: true }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "선호 추정", exact: true }).click();
+  await page.clock.install();
+  await page.getByRole("button", { name: "새 세션 만들기" }).click();
+  const clock = page.getByRole("timer", { name: "설문 남은 시간" });
+  await expect(clock).toContainText(/0[45]:\d{2}/);
+  await page.clock.fastForward(2000);
+  await expect(clock).not.toContainText("05:00");
+  await expect(page.getByRole("button", { name: "결과 확인" })).toBeVisible();
+  await page.getByRole("button", { name: "결과 확인" }).click();
+  await expect(
+    page.getByRole("heading", { name: "COMMON · 공통 ε 비교 기준" }),
+  ).toBeVisible();
+  const download = page.waitForEvent("download");
+  await page.getByRole("button", { name: "기록 내보내기" }).click();
+  expect((await download).suggestedFilename()).toMatch(/npsdm-.*zip/);
+  await page.screenshot({
+    path: "../validation/ELICITATION.png",
+    fullPage: true,
+  });
+});
+test("Invalid credentials remain blocked", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("로컬 접근 토큰").fill("invalid");
+  await page.getByRole("button", { name: "콘솔 연결" }).click();
+  await expect(page.locator(".error[role=alert]")).toContainText(
+    "Valid bearer token required",
+  );
+});
+
+test("Scenario-first question, utility drilldown and requested fonts", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByLabel("로컬 접근 토큰").fill(token);
+  await page.getByRole("button", { name: "콘솔 연결" }).click();
+  await expect(
+    page.getByRole("heading", {
+      name: "서로 다른 희망 온도, 하나의 공유 온도",
+    }),
+  ).toBeVisible();
+  await page.screenshot({
+    path: "../validation/OVERVIEW_V2.png",
+    fullPage: true,
+  });
+  await page.getByRole("button", { name: "데이터 없이 첫 질문 체험" }).click();
+  await expect(
+    page.getByRole("heading", { name: "5명이 함께 사용할 온도를 정해주세요" }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("5명의 평균 온도차이", { exact: true }),
+  ).toHaveCount(2);
+  await expect(
+    page.getByText("가장 차이가 큰 사람의 온도차이", { exact: true }),
+  ).toHaveCount(2);
+  await expect(
+    page.getByRole("heading", { name: "사람 간 효용이 얼마나 고른가요?" }),
+  ).toHaveCount(0);
+  await page.getByText("익명 개인별 효용 그래프 보기", { exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "사람 간 효용이 얼마나 고른가요?" }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "참여자 1 상세정보" }).click();
+  await expect(page.locator("#person-detail")).toContainText("성별");
+  await expect(page.locator("#person-detail")).toContainText("연구 당시 나이");
+  await expect(page.locator("#person-detail")).toContainText("희망 온도");
+  await page.evaluate(() => document.fonts.ready);
+  expect(
+    await page.locator("body").evaluate((e) => getComputedStyle(e).fontFamily),
+  ).toBe('"Times New Roman", "Noto Sans KR"');
+  await page.screenshot({
+    path: "../validation/QUESTION_V2.png",
+    fullPage: true,
+  });
+  await page.getByRole("button", { name: "세션 종료", exact: true }).click();
+  await page.getByRole("button", { name: "운영", exact: true }).click();
+  await page
+    .getByRole("button", { name: "사람·희망 온도 등록", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "예시 정책 승인 후 DEMO 실행", exact: true })
+    .click();
+  await expect(
+    page.getByText("가상 체험을 준비했습니다.", { exact: false }),
+  ).toBeVisible();
+  await expect(page.getByText("모의 실내 온도", { exact: true })).toBeVisible();
+});
+
+test.describe("Publication captures at 2x resolution", () => {
+  test.use({ deviceScaleFactor: 2 });
+  test("Publication panels preserve context, uncertainty and responsive layout", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await page.getByLabel("로컬 접근 토큰").fill(token);
+    await page.getByRole("button", { name: "콘솔 연결" }).click();
+    await page
+      .getByRole("button", { name: "데이터 없이 첫 질문 체험" })
+      .click();
+    await page
+      .getByRole("button", { name: "질문 Figure 보기", exact: true })
+      .click();
+    await expect(page.locator(".figure-focused")).toHaveCount(1);
+    await page.evaluate(() => document.fonts.ready);
+    await page
+      .locator('[data-figure="질문"]')
+      .screenshot({ path: "../validation/FIGURE_QUESTION.png" });
+    await page.keyboard.press("Escape");
+    await expect(page.locator(".figure-focused")).toHaveCount(0);
+    await page.getByRole("button", { name: "결과 확인", exact: true }).click();
+    await expect(page.locator('[data-figure="결과"]')).toContainText(
+      "아직 보고하지 않음",
+    );
+    await page.locator(".choice button").first().click();
+    await expect(page.locator('[data-figure="결과"]')).toContainText(
+      "1개 유효 응답",
+    );
+    await page
+      .getByRole("button", { name: "결과 Figure 보기", exact: true })
+      .click();
+    await expect(page.locator('[data-figure="결과"]')).toContainText(
+      "베이지안 신용집합",
+    );
+    await expect(page.locator('[data-figure="결과"] svg')).toHaveAttribute(
+      "aria-label",
+      /q=ε/,
+    );
+    await page
+      .locator('[data-figure="결과"]')
+      .screenshot({ path: "../validation/FIGURE_RESULT.png" });
+    await page.setViewportSize({ width: 390, height: 844 });
+    expect(
+      await page
+        .locator('[data-figure="결과"]')
+        .evaluate((e) => e.scrollWidth <= e.clientWidth),
+    ).toBe(true);
+    await page.keyboard.press("Escape");
+    await page.getByRole("button", { name: "세션 종료", exact: true }).click();
+  });
+});

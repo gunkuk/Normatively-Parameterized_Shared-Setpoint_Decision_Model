@@ -1,0 +1,17 @@
+{
+  "group_id": "N10/R118",
+  "grid": "N10/H4",
+  "a": 93,
+  "b": 130,
+  "id": "N10/R118:93:130",
+  "source_version": "1178ec2049d922c15aeaad9d3e179ab52facf5c4e14d7fcfb976edfe41f2fccd",
+  "eig_bits": 0.8033339034227465,
+  "evaluated_candidates": 53172000,
+  "elapsed_seconds": 376.95328890008386,
+  "exact_discrete_global": true,
+  "peak_rss_bytes": 399360000,
+  "quadrature_count": 64,
+  "precision": "float64",
+  "config_hash": "1178ec2049d922c15aeaad9d3e179ab52facf5c4e14d7fcfb976edfe41f2fccd",
+  "platform": "win32"
+}

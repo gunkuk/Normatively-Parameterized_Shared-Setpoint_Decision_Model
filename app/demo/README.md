@@ -1,0 +1,3 @@
+# Seeded operating demo
+
+POST /api/v1/demo/seed?zone_id=...&seed=7 creates SIMULATED observations. A frozen N=8 source group supplies initial desired temperatures. Over 12 fifteen-minute steps, periodic departures/arrivals and a +/-0.15 C sinusoidal preference drift change the group. Indoor temperature follows a first-order response coefficient 0.2, with independent Gaussian process noise 0.08 C and sensor noise 0.05 C. The endpoint returns the seed, base group and base timestamp. This toy process is not calibrated HVAC physics. No synthetic energy series is passed off as metered actual consumption.

@@ -1,0 +1,22 @@
+version: 1
+question_temperature_min_c: 12.0
+question_temperature_max_c: 33.0
+question_temperature_step_c: 0.1
+utility_width_c: 6.0
+utility_floor: 0.001
+group_sizes: [3, 4, 5, 6, 7, 8, 9, 10]
+heterogeneity_quantiles: 5
+q_quadrature_count: 64
+prior_family: uniform
+prior_alpha: 1.0
+prior_beta: 1.0
+choice_kappa: 30.0
+choice_lapse: 0.05
+experiment_time_budget: 600
+posterior_mass: 0.95
+mode_switch_rule: B
+comparison_tolerance: 1.0e-10
+root_tolerance: 1.0e-9
+pair_block_size: 4096
+precision: float64
+reference_temperature_c: 23.0
