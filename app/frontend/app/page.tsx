@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
+import { ResultFigure } from "@/components/result";
 import { QuestionPanel } from "@/components/question";
 type Json = Record<string, any>;
 const tabs = [
@@ -20,44 +21,6 @@ function Detail({ data }: { data: unknown }) {
       <summary>근거·원자료 보기</summary>
       <pre>{JSON.stringify(data, null, 2)}</pre>
     </details>
-  );
-}
-function Posterior({ data }: { data: Json }) {
-  const w: number[] = data.weights || [];
-  const max = Math.max(...w, 0.001);
-  return (
-    <>
-      <svg
-        className="chart"
-        viewBox="0 0 640 140"
-        role="img"
-        aria-label="q 좌표상의 ε 사후확률 분포"
-      >
-        <path
-          d={`M 0 130 ${w.map((v, i) => `L ${(i * 640) / Math.max(1, w.length - 1)} ${130 - (v / max) * 120}`).join(" ")}`}
-          fill="none"
-          stroke="#08786a"
-          strokeWidth="2"
-        />
-        <text x="0" y="140" fontSize="10">
-          q=0
-        </text>
-        <text x="600" y="140" fontSize="10">
-          q=1
-        </text>
-      </svg>
-      <p className="muted">
-        ε 중앙값 {Number(data.median).toFixed(3)} · {data.status} · credible set
-        ({(100 * (data.requested_mass ?? 0.95)).toFixed(0)}%){" "}
-        {data.credible_set
-          ?.map(
-            (c: (number | null)[]) =>
-              `[${c[0] === null ? "∞" : Number(c[0]).toFixed(3)}, ${c[1] === null ? "∞" : Number(c[1]).toFixed(3)}]`,
-          )
-          .join(" ∪ ")}
-      </p>
-      <Detail data={data} />
-    </>
   );
 }
 export default function Home() {
@@ -685,9 +648,17 @@ export default function Home() {
             )}
             {result && (
               <>
+                <ResultFigure
+                  result={result}
+                  count={
+                    (state?.trials ?? []).filter(
+                      (t: Json) => t.response === 0 || t.response === 1,
+                    ).length
+                  }
+                />
                 <section className="card">
                   <h2>{result.stage} · 공통 ε 비교 기준</h2>
-                  <Posterior data={result.common} />
+                  <Detail data={result.common} />
                   <div className="notice">
                     {result.deterministic.status} · 엄격한 일관성 구간은
                     베이지안 credible set과 다릅니다. 구간 간 충돌은 실제 맥락별

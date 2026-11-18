@@ -117,6 +117,63 @@ test("Scenario-first question, utility drilldown and requested fonts", async ({
   });
   await page.getByRole("button", { name: "세션 종료", exact: true }).click();
   await page.getByRole("button", { name: "Overview", exact: true }).click();
-  await page.getByRole("button", { name: "예시 정책 승인 후 DEMO 실행", exact: true }).click();
-  await expect(page.getByText("가상 체험을 준비했습니다.", { exact: false })).toBeVisible();
+  await page
+    .getByRole("button", { name: "예시 정책 승인 후 DEMO 실행", exact: true })
+    .click();
+  await expect(
+    page.getByText("가상 체험을 준비했습니다.", { exact: false }),
+  ).toBeVisible();
+});
+
+test.describe("Publication captures at 2x resolution", () => {
+  test.use({ deviceScaleFactor: 2 });
+  test("Publication panels preserve context, uncertainty and responsive layout", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await page.getByLabel("로컬 접근 토큰").fill(token);
+    await page.getByRole("button", { name: "콘솔 연결" }).click();
+    await page
+      .getByRole("button", { name: "데이터 없이 첫 질문 체험" })
+      .click();
+    await page
+      .getByRole("button", { name: "질문 Figure 보기", exact: true })
+      .click();
+    await expect(page.locator(".figure-focused")).toHaveCount(1);
+    await page.evaluate(() => document.fonts.ready);
+    await page
+      .locator('[data-figure="질문"]')
+      .screenshot({ path: "../validation/FIGURE_QUESTION.png" });
+    await page.keyboard.press("Escape");
+    await expect(page.locator(".figure-focused")).toHaveCount(0);
+    await page.getByRole("button", { name: "결과 확인", exact: true }).click();
+    await expect(page.locator('[data-figure="결과"]')).toContainText(
+      "아직 보고하지 않음",
+    );
+    await page.locator(".choice button").first().click();
+    await expect(page.locator('[data-figure="결과"]')).toContainText(
+      "1개 유효 응답",
+    );
+    await page
+      .getByRole("button", { name: "결과 Figure 보기", exact: true })
+      .click();
+    await expect(page.locator('[data-figure="결과"]')).toContainText(
+      "베이지안 신용집합",
+    );
+    await expect(page.locator('[data-figure="결과"] svg')).toHaveAttribute(
+      "aria-label",
+      /q=ε/,
+    );
+    await page
+      .locator('[data-figure="결과"]')
+      .screenshot({ path: "../validation/FIGURE_RESULT.png" });
+    await page.setViewportSize({ width: 390, height: 844 });
+    expect(
+      await page
+        .locator('[data-figure="결과"]')
+        .evaluate((e) => e.scrollWidth <= e.clientWidth),
+    ).toBe(true);
+    await page.keyboard.press("Escape");
+    await page.getByRole("button", { name: "세션 종료", exact: true }).click();
+  });
 });

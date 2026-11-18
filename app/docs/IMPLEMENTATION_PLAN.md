@@ -8,3 +8,5 @@
 4. Integration and delivery — local verification complete; remote verification status is available through the PR workflow checks. See validation/TEST_REPORT.md for evidence and disclosed limits.
 
 No hidden filtering, no empirical calibration claims, no automatic physical control, no automatic merge.
+
+Current priority: publication-readable question and result panels. Verify standalone context, labeled axes and uncertainty, capture view, and browser screenshots. Preserve numerical inference and operational behavior.

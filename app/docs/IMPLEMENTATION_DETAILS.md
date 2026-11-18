@@ -55,3 +55,8 @@ The question screen begins with the synthetic-group context. Primary numbers are
 Individual utility graphs and equality (1-Gini) appear only on expansion. Clicking a participant shows the source sex (0=female, 1=male), study-age and representative desired temperature; never names, original subject IDs, BMI or weight. Demographics are descriptive and are not inference features. This explicitly supersedes the original brief's prohibition of demographic labels, following the user's November 18 request. The changed presentation is versioned and has not been empirically calibrated for framing effects.
 
 Fonts are Times New Roman and locally bundled Noto Sans KR only. Latin text uses Times New Roman where installed, with Noto Sans KR as the supported fallback; no proprietary Times New Roman files are redistributed.
+
+
+## 6. Publication display amendment
+
+Question and result Figure views isolate presentation without changing selection, inference, or approval semantics. Posterior bars represent equal-q quadrature cell masses; epsilon labels sit on the q-transformed axis. There is no interpolation or fitted density. Gray prior-only results do not report a personal median or credible set. Illustrative validation captures use automated responses and must not be cited as empirical outcomes.

@@ -70,3 +70,12 @@ CI regression: a run near Asia/Seoul midnight correctly split one 15-minute expo
 - PASS: deployed full-bank A and B cache adoption; DELIVERY_V2.json. Initial measured first-question response 2.09 seconds; shared two-branch cold scan 59.20 seconds; answer-to-next-question 0.036/0.042 seconds after results were ready. These are local measurements, not a service-level promise. Server-start prewarming was added afterward; it changes when work begins, not the exact numerical selection.
 - LIMIT: a user answering before speculative work finishes still waits. Skip histories require their own computation. Cache reuse does not provide calibrated human inference or remove exhaustive computation costs.
 - User-authorized changes supersede the initial specification only for the fixed introductory question and descriptive demographic display; scientific utility and posterior definitions remain unchanged.
+
+
+## Publication panel validation
+
+- PASS: frontend TypeScript check and production build.
+- PASS: four browser journeys, including isolated question/result views, Escape return, prior-only labeling, a one-answer posterior, transformed-axis annotation, and 390-pixel layout overflow check.
+- PASS: saved question/result panels visually inspected for readable values, axes, legends, and no clipping. Publication captures use a 2x device pixel ratio.
+- Numerical algorithms unchanged; backend numerical tests are not rerun locally for this presentation-only change. The PR workflow runs its normal regression suite.
+- FIGURE_RESULT.png is a one-response automated UI example, not a human study result. Formal accessibility and journal acceptance are not certified.

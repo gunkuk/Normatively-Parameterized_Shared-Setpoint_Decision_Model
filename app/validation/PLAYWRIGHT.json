@@ -115,12 +115,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 3378,
+                  "duration": 2036,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-11-18T13:01:54.790Z",
+                  "startTime": "2026-11-18T13:10:56.701Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -149,12 +149,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 386,
+                  "duration": 310,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-11-18T13:01:58.390Z",
+                  "startTime": "2026-11-18T13:10:58.899Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -183,12 +183,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 2333,
+                  "duration": 1157,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-11-18T13:01:58.788Z",
+                  "startTime": "2026-11-18T13:10:59.216Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -201,14 +201,58 @@
           "line": 74,
           "column": 1
         }
+      ],
+      "suites": [
+        {
+          "title": "Publication captures at 2x resolution",
+          "file": "operator.spec.ts",
+          "line": 128,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Publication panels preserve context, uncertainty and responsive layout",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1068,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-18T13:11:00.384Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "078afe649bee3f2d7b39-eae5cfff81175b5e9c80",
+              "file": "operator.spec.ts",
+              "line": 130,
+              "column": 3
+            }
+          ]
+        }
       ]
     }
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-11-18T13:01:54.244Z",
-    "duration": 7022.314,
-    "expected": 3,
+    "startTime": "2026-11-18T13:10:56.250Z",
+    "duration": 5362.454,
+    "expected": 4,
     "skipped": 0,
     "unexpected": 0,
     "flaky": 0
